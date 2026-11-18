@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e11d48">
+<title>Bolingo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:#fff1f2;color:#1f2937;min-height:100vh;display:flex;flex-direction:column}
+header{background:#e11d48;color:#fff;padding:14px;text-align:center;font-size:20px;font-weight:700}
+main{flex:1;padding:16px;max-width:480px;width:100%;margin:0 auto;padding-bottom:80px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #fecdd3}
+nav button{flex:1;padding:14px 4px;border:0;background:none;font-size:14px;color:#6b7280}
+nav button.on{color:#e11d48;font-weight:700}
+input,textarea{width:100%;padding:12px;margin:6px 0;border:1px solid #d1d5db;border-radius:10px;font-size:16px;font-family:inherit}
+button.p{width:100%;padding:13px;border:0;border-radius:10px;background:#e11d48;color:#fff;font-size:16px;font-weight:600;margin-top:8px}
+button.s{width:100%;padding:11px;border:1px solid #e11d48;border-radius:10px;background:#fff;color:#e11d48;font-size:15px;margin-top:8px}
+.card{background:#fff;border-radius:18px;padding:28px 20px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.card h2{margin:0 0 6px}
+.av{width:90px;height:90px;border-radius:50%;background:#fda4af;color:#fff;font-size:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.row{display:flex;gap:12px;margin-top:16px}
+.row button{flex:1;padding:16px;border:0;border-radius:50px;font-size:22px;color:#fff}
+.no{background:#9ca3af}.yes{background:#e11d48}
+.item{background:#fff;padding:14px;border-radius:12px;margin:8px 0;display:flex;align-items:center;gap:12px}
+.msgs{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.m{max-width:78%;padding:9px 12px;border-radius:14px;background:#fff;word-wrap:break-word}
+.m.me{align-self:flex-end;background:#e11d48;color:#fff}
+.err{color:#b91c1c;font-size:14px;min-height:18px}
+.muted{color:#6b7280;text-align:center}
+.send{position:fixed;bottom:52px;left:0;right:0;background:#fff;padding:8px;display:flex;gap:8px;max-width:480px;margin:0 auto}
+.send input{margin:0}.send button{width:90px;margin:0}
+</style>
+</head>
+<body>
+<header>💞 Bolingo</header>
+<main id="app"></main>
+<nav id="nav" style="display:none">
+  <button data-v="swipe">Découvrir</button>
+  <button data-v="matches">Matchs</button>
+  <button data-v="profile">Profil</button>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBBb6I8jfqQJdbu5nflwyp99G5IdeX86fo",
+  authDomain: "bolingo-e8026.firebaseapp.com",
+  projectId: "bolingo-e8026",
+  storageBucket: "bolingo-e8026.firebasestorage.app",
+  messagingSenderId: "725617425607",
+  appId: "1:725617425607:web:197cf6392d2f74eb5c92e2",
+  measurementId: "G-YY66MSTMKV"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const $app = document.getElementById('app');
+const $nav = document.getElementById('nav');
+let uid = null, unsub = null;
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html; return d; }
+function esc(s){ const d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML; }
+function setNav(v){ $nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)); }
+function stop(){ if(unsub){unsub();unsub=null;} }
+$nav.onclick = e => { const v=e.target.dataset.v; if(v) go(v); };
+
+function go(v, arg){
+  stop(); setNav(v);
+  if(v==='swipe') viewSwipe();
+  else if(v==='matches') viewMatches();
+  else if(v==='profile') viewProfile();
+  else if(v==='chat') viewChat(arg);
+}
+
+/* ---------- Connexion ---------- */
+function viewAuth(){
+  $nav.style.display='none';
+  $app.innerHTML=`<div class="card">
+    <h2>Bienvenue</h2><p class="muted">Connecte-toi ou crée un compte</p>
+    <input id="em" type="email" placeholder="E-mail" autocomplete="email">
+    <input id="pw" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
+    <div class="err" id="err"></div>
+    <button class="p" id="login">Se connecter</button>
+    <button class="s" id="signup">Créer un compte</button></div>`;
+  const run = async fn => {
+    try{ await fn(document.getElementById('em').value.trim(), document.getElementById('pw').value); }
+    catch(e){ document.getElementById('err').textContent = e.message; }
+  };
+  document.getElementById('login').onclick = () => run((a,b)=>auth.signInWithEmailAndPassword(a,b));
+  document.getElementById('signup').onclick = () => run((a,b)=>auth.createUserWithEmailAndPassword(a,b));
+}
+
+/* ---------- Profil ---------- */
+async function viewProfile(first){
+  const snap = await db.doc('users/'+uid).get();
+  const p = snap.exists ? snap.data() : {};
+  $app.innerHTML=`<div class="card" style="text-align:left">
+    <h2>${first?'Crée ton profil':'Mon profil'}</h2>
+    <input id="name" maxlength="40" placeholder="Prénom" value="${esc(p.name)}">
+    <input id="age" type="number" min="18" max="99" placeholder="Âge" value="${esc(p.age)}">
+    <input id="city" placeholder="Ville" value="${esc(p.city)}">
+    <textarea id="bio" rows="4" maxlength="400" placeholder="Parle de toi…">${esc(p.bio)}</textarea>
+    <div class="err" id="err"></div>
+    <button class="p" id="save">Enregistrer</button>
+    <button class="s" id="out">Se déconnecter</button></div>`;
+  document.getElementById('save').onclick = async () => {
+    const name=document.getElementById('name').value.trim();
+    if(!name){ document.getElementById('err').textContent='Le prénom est obligatoire.'; return; }
+    try{
+      await db.doc('users/'+uid).set({
+        name, age:Number(document.getElementById('age').value)||null,
+        city:document.getElementById('city').value.trim(),
+        bio:document.getElementById('bio').value.trim()
+      },{merge:true});
+      go('swipe');
+    }catch(e){ document.getElementById('err').textContent=e.message; }
+  };
+  document.getElementById('out').onclick = () => auth.signOut();
+}
+
+/* ---------- Découvrir ---------- */
+async function viewSwipe(){
+  $app.innerHTML='<p class="muted">Chargement…</p>';
+  try{
+    const done = new Set();
+    (await db.collection('swipes').where('from','==',uid).get()).forEach(d=>done.add(d.data().to));
+    const all = await db.collection('users').limit(100).get();
+    const deck = [];
+    all.forEach(d=>{ if(d.id!==uid && !done.has(d.id) && d.data().name) deck.push({id:d.id,...d.data()}); });
+    showCard(deck);
+  }catch(e){ $app.innerHTML='<p class="err">'+esc(e.message)+'</p>'; }
+}
+function showCard(deck){
+  if(!deck.length){ $app.innerHTML='<div class="card"><h2>Plus personne pour l’instant</h2><p class="muted">Reviens plus tard !</p><button class="s" id="r">Actualiser</button></div>'; document.getElementById('r').onclick=viewSwipe; return; }
+  const u = deck[0];
+  $app.innerHTML=`<div class="card"><div class="av">${esc(u.name[0].toUpperCase())}</div>
+    <h2>${esc(u.name)}${u.age?', '+esc(u.age):''}</h2>
+    <div class="muted">${esc(u.city)}</div><p>${esc(u.bio)}</p>
+    <div class="row"><button class="no" id="pass">✕</button><button class="yes" id="like">♥</button></div></div>`;
+  const act = async type => {
+    try{
+      await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:firebase.firestore.FieldValue.serverTimestamp()});
+      if(type==='like'){
+        const back = await db.doc('swipes/'+u.id+'_'+uid).get();
+        if(back.exists && back.data().type==='like'){
+          const users=[uid,u.id].sort();
+          await db.doc('matches/'+users.join('_')).set({users,at:firebase.firestore.FieldValue.serverTimestamp()});
+          alert('💞 C’est un match avec '+u.name+' !');
+        }
+      }
+    }catch(e){ alert(e.message); }
+    deck.shift(); showCard(deck);
+  };
+  document.getElementById('pass').onclick=()=>act('pass');
+  document.getElementById('like').onclick=()=>act('like');
+}
+
+/* ---------- Matchs ---------- */
+async function viewMatches(){
+  $app.innerHTML='<p class="muted">Chargement…</p>';
+  try{
+    const snap = await db.collection('matches').where('users','array-contains',uid).get();
+    if(snap.empty){ $app.innerHTML='<div class="card"><h2>Pas encore de match</h2><p class="muted">Continue à swiper !</p></div>'; return; }
+    $app.innerHTML='<h3>Mes matchs</h3><div id="list"></div>';
+    for(const m of snap.docs){
+      const other = m.data().users.find(x=>x!==uid);
+      const u = await db.doc('users/'+other).get();
+      const name = u.exists ? u.data().name : 'Utilisateur';
+      const it = el(`<div class="item"><div class="av" style="width:44px;height:44px;font-size:20px;margin:0">${esc(name[0].toUpperCase())}</div><b>${esc(name)}</b></div>`).firstChild;
+      it.onclick=()=>go('chat',{id:m.id,name});
+      document.getElementById('list').appendChild(it);
+    }
+  }catch(e){ $app.innerHTML='<p class="err">'+esc(e.message)+'</p>'; }
+}
+
+/* ---------- Chat ---------- */
+function viewChat(m){
+  $app.innerHTML=`<button class="s" id="back" style="margin:0 0 10px">← Retour</button><h3>${esc(m.name)}</h3>
+    <div class="msgs" id="msgs"></div>
+    <div class="send"><input id="txt" maxlength="1000" placeholder="Message…"><button class="p" id="go">Envoyer</button></div>`;
+  document.getElementById('back').onclick=()=>go('matches');
+  const box=document.getElementById('msgs');
+  unsub = db.collection('matches/'+m.id+'/messages').orderBy('at').onSnapshot(s=>{
+    box.innerHTML='';
+    s.forEach(d=>{ const x=d.data(); const b=document.createElement('div'); b.className='m'+(x.from===uid?' me':''); b.textContent=x.text; box.appendChild(b); });
+    window.scrollTo(0,document.body.scrollHeight);
+  },e=>{ box.textContent=e.message; });
+  const send=async()=>{
+    const i=document.getElementById('txt'); const t=i.value.trim(); if(!t) return; i.value='';
+    try{ await db.collection('matches/'+m.id+'/messages').add({from:uid,text:t,at:firebase.firestore.FieldValue.serverTimestamp()}); }
+    catch(e){ alert(e.message); }
+  };
+  document.getElementById('go').onclick=send;
+  document.getElementById('txt').onkeydown=e=>{ if(e.key==='Enter') send(); };
+}
+
+/* ---------- Démarrage ---------- */
+auth.onAuthStateChanged(async user=>{
+  stop();
+  if(!user){ uid=null; viewAuth(); return; }
+  uid=user.uid; $nav.style.display='flex';
+  const p = await db.doc('users/'+uid).get();
+  if(!p.exists || !p.data().name){ setNav('profile'); viewProfile(true); }
+  else go('swipe');
+});
+</script>
+</body>
+</html>
