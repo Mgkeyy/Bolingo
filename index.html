@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e11d48"><title>Bolingo</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,sans-serif;background:#fff1f2;color:#1f2937;overscroll-behavior:none}
+header{background:#e11d48;color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700;position:sticky;top:0;z-index:5}
+header button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:20px;padding:6px 12px;font-size:14px}
+main{max-width:480px;margin:0 auto;padding:14px 14px 90px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #fecdd3;z-index:5}
+nav button{flex:1;padding:10px 4px;border:0;background:none;font-size:12px;color:#6b7280}
+nav button b{display:block;font-size:20px}nav button.on{color:#e11d48;font-weight:700}
+input,select,textarea{width:100%;padding:12px;margin:4px 0 10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;font-family:inherit;background:#fff}
+label{font-size:13px;color:#6b7280}
+.btn{width:100%;padding:13px;border:0;border-radius:12px;background:#e11d48;color:#fff;font-size:16px;font-weight:600;margin-top:6px}
+.btn.s{background:#fff;color:#e11d48;border:1px solid #e11d48}.btn:disabled{opacity:.6}
+.box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.tabs{display:flex;background:#ffe4e6;border-radius:12px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;padding:10px;border:0;border-radius:9px;background:none;font-size:15px;color:#9f1239}.tabs .on{background:#fff;font-weight:700}
+.err{color:#b91c1c;font-size:14px;min-height:18px;margin:4px 0}.muted{color:#6b7280;text-align:center}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stack{position:relative;height:min(68vh,560px);touch-action:none}
+.card{position:absolute;inset:0;border-radius:20px;background:#ddd center/cover;box-shadow:0 6px 20px rgba(0,0,0,.2);overflow:hidden;user-select:none;touch-action:none;will-change:transform}
+.card.back{transform:scale(.95) translateY(10px);opacity:.9}
+.info{position:absolute;left:0;right:0;bottom:0;padding:50px 16px 16px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.85))}
+.info h2{margin:0;font-size:26px}.info p{margin:3px 0 0;font-size:14px;opacity:.95}
+.dots{position:absolute;top:8px;left:8px;right:8px;display:flex;gap:4px}.dots i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.45)}.dots i.on{background:#fff}
+.stamp{position:absolute;top:34px;padding:4px 12px;border:4px solid;border-radius:8px;font-size:30px;font-weight:800;opacity:0;transform:rotate(-12deg)}
+.st-l{left:20px;color:#22c55e;border-color:#22c55e}.st-n{right:20px;color:#ef4444;border-color:#ef4444;transform:rotate(12deg)}
+.ibtn{position:absolute;right:12px;bottom:78px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.9);font-size:18px}
+.acts{display:flex;justify-content:center;gap:28px;margin-top:16px}
+.acts button{width:66px;height:66px;border-radius:50%;border:0;font-size:28px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.chip{display:inline-block;background:rgba(255,255,255,.25);border-radius:14px;padding:3px 10px;margin:4px 4px 0 0;font-size:12px}
+.chip.d{background:#ffe4e6;color:#9f1239}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:480px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px}
+.sheet img.big{width:100%;border-radius:14px;margin-bottom:8px}
+.item{background:#fff;padding:12px;border-radius:14px;margin:8px 0;display:flex;align-items:center;gap:12px}
+.av{width:54px;height:54px;border-radius:50%;background:#fda4af center/cover;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.ph{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ph div{width:30%;aspect-ratio:3/4;border-radius:12px;background:#fecdd3 center/cover;position:relative;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fb7185}
+.ph div button{position:absolute;top:3px;right:3px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff}
+.msgs{display:flex;flex-direction:column;gap:6px;margin:10px 0 70px}
+.m{max-width:78%;padding:9px 12px;border-radius:16px;background:#fff;word-wrap:break-word}.m.me{align-self:flex-end;background:#e11d48;color:#fff}
+.send{position:fixed;bottom:56px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;padding:8px;display:flex;gap:8px}.send input{margin:0}.send .btn{width:90px;margin:0}
+.spin{width:34px;height:34px;border:4px solid #fecdd3;border-top-color:#e11d48;border-radius:50%;animation:r 1s linear infinite;margin:40px auto}@keyframes r{to{transform:rotate(360deg)}}
+</style></head><body>
+<header><span>💞 Bolingo</span><button id="hf" style="display:none">⚙ Filtres</button></header>
+<main id="app"></main>
+<nav id="nav" style="display:none">
+<button data-v="swipe"><b>🔥</b>Découvrir</button><button data-v="matches"><b>💬</b>Matchs</button><button data-v="profile"><b>👤</b>Profil</button></nav>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({apiKey:"AIzaSyBBb6I8jfqQJdbu5nflwyp99G5IdeX86fo",authDomain:"bolingo-e8026.firebaseapp.com",projectId:"bolingo-e8026",storageBucket:"bolingo-e8026.firebasestorage.app",messagingSenderId:"725617425607",appId:"1:725617425607:web:197cf6392d2f74eb5c92e2"});
+const auth=firebase.auth(),db=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp();
+const $=id=>document.getElementById(id),app=$('app'),nav=$('nav');
+let uid=null,me={},unsub=null,flt={};
+try{flt=JSON.parse(localStorage.getItem('bf')||'{}')}catch(e){}
+const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML};
+const age=b=>{if(!b)return null;const d=new Date(b),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a};
+const bg=u=>u.photos&&u.photos[0]?`background-image:url(${u.photos[0]})`:'';
+const stop=()=>{if(unsub){unsub();unsub=null}};
+const spin=()=>app.innerHTML='<div class="spin"></div>';
+const ERR={'auth/invalid-credential':'E-mail ou mot de passe incorrect.','auth/invalid-email':'Adresse e-mail invalide.','auth/email-already-in-use':'Cet e-mail a déjà un compte. Connecte-toi.','auth/weak-password':'Mot de passe trop court (6 caractères min.).','auth/too-many-requests':'Trop d’essais. Réessaie plus tard.','auth/popup-closed-by-user':'','auth/network-request-failed':'Pas de connexion internet.','auth/missing-password':'Entre ton mot de passe.'};
+const fr=e=>ERR[e.code]!==undefined?ERR[e.code]:e.message;
+nav.onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
+function go(v,a){stop();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,matches:viewMatches,profile:()=>viewProfile(),chat:()=>viewChat(a)})[v]()}
+
+/* ---- Connexion ---- */
+function viewAuth(mode='in'){
+ nav.style.display='none';$('hf').style.display='none';
+ app.innerHTML=`<div class="box"><div class="tabs"><button id="t1" class="${mode==='in'?'on':''}">Connexion</button><button id="t2" class="${mode==='up'?'on':''}">Inscription</button></div>
+ <form id="f"><input id="em" type="email" placeholder="E-mail" autocomplete="email" required>
+ <input id="pw" type="password" placeholder="Mot de passe" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
+ <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?'Se connecter':'Créer mon compte'}</button></form>
+ <button class="btn s" id="gg">Continuer avec Google</button>
+ ${mode==='in'?'<p class="muted"><a href="#" id="fg">Mot de passe oublié ?</a></p>':''}</div>`;
+ $('t1').onclick=()=>viewAuth('in');$('t2').onclick=()=>viewAuth('up');
+ const er=m=>$('err').textContent=m;
+ $('f').onsubmit=async e=>{e.preventDefault();$('go').disabled=true;er('');
+  try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}
+  catch(x){er(fr(x));$('go').disabled=false}};
+ $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};
+ if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er('Entre ton e-mail puis touche « Mot de passe oublié ».');
+  try{await auth.sendPasswordResetEmail(a);er('');alert('E-mail de réinitialisation envoyé.')}catch(x){er(fr(x))}};
+}
+
+/* ---- Profil ---- */
+const REL=['','Chrétien','Catholique','Protestant','Musulman','Kimbanguiste','Autre','Sans religion'];
+function resize(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onerror=ko;r.onload=()=>{const i=new Image();i.onerror=ko;i.onload=()=>{const m=640,k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};i.src=r.result};r.readAsDataURL(file)})}
+function viewProfile(first){
+ const p=me,photos=[...(p.photos||[])];
+ const sel=(id,opts,v)=>`<select id="${id}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+ const inp=(id,l,v,t='text',x='')=>`<label>${l}</label><input id="${id}" type="${t}" value="${esc(v)}" ${x}>`;
+ app.innerHTML=`<div class="box"><h2 style="margin-top:0">${first?'Crée ton profil':'Mon profil'}</h2>
+ <label>Photos (1 à 3, la première est la principale)</label><div class="ph" id="ph"></div>
+ <input id="file" type="file" accept="image/*" style="display:none">
+ <div class="g">${inp('name','Prénom *',p.name,'text','maxlength=40')}${inp('lastName','Nom',p.lastName,'text','maxlength=40')}</div>
+ <div class="g"><div><label>Genre *</label>${sel('gender',['','Homme','Femme'],p.gender)}</div><div><label>Je recherche</label>${sel('seeking',['Tous','Homme','Femme'],p.seeking||'Tous')}</div></div>
+ ${inp('birth','Date de naissance * (18 ans min.)',p.birth,'date')}
+ <div class="g">${inp('city','Commune / Ville',p.city)}${inp('height','Taille (cm)',p.height,'number','min=120 max=230')}</div>
+ ${inp('job','Poste / Profession',p.job)}${inp('school','Université / École',p.school)}${inp('church','Église / Communauté',p.church)}
+ <label>Religion</label>${sel('religion',REL,p.religion)}
+ ${inp('interests','Centres d’intérêt (séparés par des virgules)',(p.interests||[]).join(', '))}
+ <label>À propos de moi</label><textarea id="bio" rows="4" maxlength="400">${esc(p.bio)}</textarea>
+ <div class="err" id="err"></div><button class="btn" id="save">Enregistrer</button>
+ ${first?'':'<button class="btn s" id="out">Se déconnecter</button>'}</div>`;
+ const draw=()=>{$('ph').innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('div');if(photos[i]){d.style.backgroundImage=`url(${photos[i]})`;const b=document.createElement('button');b.textContent='✕';b.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(b)}else{d.textContent='+';d.onclick=()=>$('file').click()}$('ph').appendChild(d)}};draw();
+ $('file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{photos.push(await resize(f));draw()}catch(x){$('err').textContent='Photo illisible.'}};
+ const v=id=>$(id).value.trim();
+ $('save').onclick=async()=>{const er=m=>$('err').textContent=m;
+  if(!v('name'))return er('Le prénom est obligatoire.');if(!$('gender').value)return er('Choisis ton genre.');
+  const a=age(v('birth'));if(a===null||a<18)return er('Tu dois avoir 18 ans ou plus.');if(!photos.length)return er('Ajoute au moins une photo.');
+  const d={name:v('name'),lastName:v('lastName'),gender:$('gender').value,seeking:$('seeking').value,birth:v('birth'),city:v('city'),height:Number(v('height'))||null,job:v('job'),school:v('school'),church:v('church'),religion:$('religion').value,interests:v('interests').split(',').map(s=>s.trim()).filter(Boolean).slice(0,12),bio:v('bio'),photos};
+  $('save').disabled=true;try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};go('swipe')}catch(x){er(x.message);$('save').disabled=false}};
+ if($('out'))$('out').onclick=()=>auth.signOut();
+}
+
+/* ---- Découvrir ---- */
+function pass(u){
+ if(u.id===uid||!u.name||!(u.photos&&u.photos.length))return false;
+ const a=age(u.birth),L=s=>(s||'').toLowerCase();
+ if(me.seeking&&me.seeking!=='Tous'&&u.gender!==me.seeking)return false;
+ if(u.seeking&&u.seeking!=='Tous'&&me.gender&&me.gender!==u.seeking)return false;
+ if(flt.amin&&a<flt.amin)return false;if(flt.amax&&a>flt.amax)return false;
+ if(flt.hmin&&(u.height||0)<flt.hmin)return false;
+ if(flt.city&&!L(u.city).includes(L(flt.city)))return false;
+ if(flt.school&&!L(u.school).includes(L(flt.school)))return false;
+ if(flt.church&&!L(u.church).includes(L(flt.church)))return false;
+ if(flt.religion&&u.religion!==flt.religion)return false;
+ if(flt.interest&&!(u.interests||[]).some(i=>L(i).includes(L(flt.interest))))return false;
+ return true}
+async function viewSwipe(){
+ spin();
+ try{const done=new Set();(await db.collection('swipes').where('from','==',uid).get()).forEach(d=>done.add(d.data().to));
+  const deck=[];(await db.collection('users').limit(80).get()).forEach(d=>{const u={id:d.id,...d.data()};if(!done.has(u.id)&&pass(u))deck.push(u)});
+  deck.sort(()=>Math.random()-.5);showDeck(deck)}catch(e){app.innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
+function cardHTML(u,back){const n=(u.photos||[]).length;
+ return `<div class="card ${back?'back':''}" style="${bg(u)}">${back?'':`<div class="dots">${(u.photos||[]).map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div><div class="stamp st-l">LIKE</div><div class="stamp st-n">NOPE</div><button class="ibtn">ℹ</button>`}
+ <div class="info"><h2>${esc(u.name)}${age(u.birth)?', '+age(u.birth):''}</h2><p>${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</p>${(u.interests||[]).slice(0,4).map(i=>`<span class="chip">${esc(i)}</span>`).join('')}</div></div>`}
+function showDeck(deck){
+ if(!deck.length){app.innerHTML='<div class="box muted"><h2>Plus personne pour l’instant</h2><p>Élargis tes filtres ou reviens plus tard.</p><button class="btn" id="r">Actualiser</button></div>';$('r').onclick=viewSwipe;return}
+ const u=deck[0];
+ app.innerHTML=`<div class="stack" id="st">${deck[1]?cardHTML(deck[1],1):''}${cardHTML(u)}</div><div class="acts"><button id="no">✕</button><button id="yes">♥</button></div>`;
+ const c=app.querySelectorAll('.card');const top=c[c.length-1],sl=top.querySelector('.st-l'),sn=top.querySelector('.st-n'),dots=top.querySelectorAll('.dots i');let pi=0,busy=false;
+ const next=()=>{deck.shift();showDeck(deck)};
+ const act=async(type)=>{if(busy)return;busy=true;top.style.transition='transform .35s';top.style.transform=`translate(${type==='like'?600:-600}px,0) rotate(${type==='like'?30:-30}deg)`;
+  try{await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS()});
+   if(type==='like'){const b=await db.doc('swipes/'+u.id+'_'+uid).get();if(b.exists&&b.data().type==='like'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});setTimeout(()=>matchPop(u),250);return setTimeout(next,300)}}}catch(e){alert(e.message)}
+  setTimeout(next,300)};
+ let sx=0,sy=0,dx=0,drag=false,moved=false;
+ top.onpointerdown=e=>{if(e.target.closest('.ibtn'))return;drag=true;moved=false;sx=e.clientX;sy=e.clientY;dx=0;top.style.transition='none';top.setPointerCapture(e.pointerId)};
+ top.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;const dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>8)moved=true;top.style.transform=`translate(${dx}px,${dy*.4}px) rotate(${dx/18}deg)`;sl.style.opacity=Math.max(0,dx/100);sn.style.opacity=Math.max(0,-dx/100)};
+ top.onpointerup=e=>{if(!drag)return;drag=false;
+  if(dx>110)return act('like');if(dx<-110)return act('pass');
+  top.style.transition='transform .25s';top.style.transform='';sl.style.opacity=sn.style.opacity=0;
+  if(!moved&&u.photos.length>1){const r=top.getBoundingClientRect();pi=(e.clientX-r.left>r.width/2)?(pi+1)%u.photos.length:(pi-1+u.photos.length)%u.photos.length;top.style.backgroundImage=`url(${u.photos[pi]})`;dots.forEach((d,i)=>d.classList.toggle('on',i===pi))}};
+ top.querySelector('.ibtn').onclick=()=>detail(u);
+ $('no').onclick=()=>act('pass');$('yes').onclick=()=>act('like');
+}
+function detail(u){
+ const row=(l,v)=>v?`<p style="margin:6px 0"><b>${l} :</b> ${esc(v)}</p>`:'';
+ const o=document.createElement('div');o.className='ov';
+ o.innerHTML=`<div class="sheet">${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}<h2 style="margin:6px 0">${esc(u.name)} ${esc(u.lastName)}${age(u.birth)?', '+age(u.birth)+' ans':''}</h2>
+ ${row('Genre',u.gender)}${row('Commune',u.city)}${row('Taille',u.height?u.height+' cm':'')}${row('Profession',u.job)}${row('Université / École',u.school)}${row('Église',u.church)}${row('Religion',u.religion)}${row('Recherche',u.seeking)}
+ ${(u.interests||[]).map(i=>`<span class="chip d">${esc(i)}</span>`).join('')}<p>${esc(u.bio)}</p>
+ <button class="btn" id="cl">Fermer</button><button class="btn s" id="rp">Signaler ce profil</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cl').onclick=()=>o.remove();
+ $('rp').onclick=async()=>{try{await db.collection('reports').add({from:uid,about:u.id,at:TS()});alert('Merci, le profil a été signalé.')}catch(e){alert(e.message)}o.remove()};
+}
+function matchPop(u){const o=document.createElement('div');o.className='ov';o.style.alignItems='center';
+ o.innerHTML=`<div class="box" style="text-align:center;margin:20px"><h1 style="color:#e11d48;margin:0">C’est un match ! 💞</h1><p>Toi et ${esc(u.name)} vous plaisez mutuellement.</p>
+ <div class="av" style="width:110px;height:110px;margin:10px auto;${bg(u)}"></div><button class="btn" id="m1">Envoyer un message</button><button class="btn s" id="m2">Continuer</button></div>`;
+ document.body.appendChild(o);$('m2').onclick=()=>o.remove();$('m1').onclick=()=>{o.remove();go('chat',{id:[uid,u.id].sort().join('_'),u})}}
+$('hf').onclick=()=>{
+ const o=document.createElement('div');o.className='ov';const f=flt;
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">Filtres de recherche</h3>
+ <div class="g"><div><label>Âge min.</label><input id="a1" type="number" value="${f.amin||''}"></div><div><label>Âge max.</label><input id="a2" type="number" value="${f.amax||''}"></div></div>
+ <label>Taille min. (cm)</label><input id="h1" type="number" value="${f.hmin||''}"><label>Commune / Ville</label><input id="c1" value="${esc(f.city)}">
+ <label>Université / École</label><input id="s1" value="${esc(f.school)}"><label>Église</label><input id="e1" value="${esc(f.church)}">
+ <label>Religion</label><select id="r1">${REL.map(r=>`<option ${r===f.religion?'selected':''}>${r}</option>`).join('')}</select>
+ <label>Centre d’intérêt</label><input id="i1" value="${esc(f.interest)}">
+ <button class="btn" id="ap">Appliquer</button><button class="btn s" id="rs">Réinitialiser</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};
+ const done=()=>{try{localStorage.setItem('bf',JSON.stringify(flt))}catch(e){}o.remove();viewSwipe()};
+ $('ap').onclick=()=>{flt={amin:+$('a1').value||0,amax:+$('a2').value||0,hmin:+$('h1').value||0,city:$('c1').value.trim(),school:$('s1').value.trim(),church:$('e1').value.trim(),religion:$('r1').value,interest:$('i1').value.trim()};done()};
+ $('rs').onclick=()=>{flt={};done()}};
+
+/* ---- Matchs & chat ---- */
+async function viewMatches(){
+ spin();
+ try{const s=await db.collection('matches').where('users','array-contains',uid).get();
+  if(s.empty){app.innerHTML='<div class="box muted"><h2>Pas encore de match</h2><p>Continue à swiper !</p></div>';return}
+  app.innerHTML='<h3>Mes matchs</h3><div id="l"></div>';
+  for(const m of s.docs){const oid=m.data().users.find(x=>x!==uid),d=await db.doc('users/'+oid).get(),u=d.exists?{id:oid,...d.data()}:{id:oid,name:'Utilisateur'};
+   const it=document.createElement('div');it.className='item';it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div><b>${esc(u.name)}</b><div class="muted" style="text-align:left;font-size:13px">${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</div></div>`;
+   it.onclick=()=>go('chat',{id:m.id,u});$('l').appendChild(it)}}catch(e){app.innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
+function viewChat(m){
+ app.innerHTML=`<div class="item" style="margin-top:0"><button class="btn s" id="bk" style="width:auto;margin:0;padding:8px 12px">←</button><div class="av" style="width:42px;height:42px;${bg(m.u)}"></div><b style="flex:1">${esc(m.u.name)}</b><button class="btn s" id="pf" style="width:auto;margin:0;padding:8px 12px">Profil</button></div>
+ <div class="msgs" id="ms"></div><div class="send"><input id="tx" maxlength="1000" placeholder="Message…"><button class="btn" id="sd">Envoyer</button></div>`;
+ $('bk').onclick=()=>go('matches');$('pf').onclick=()=>detail(m.u);
+ const box=$('ms');unsub=db.collection('matches/'+m.id+'/messages').orderBy('at').onSnapshot(s=>{box.innerHTML='';s.forEach(d=>{const x=d.data(),b=document.createElement('div');b.className='m'+(x.from===uid?' me':'');b.textContent=x.text;box.appendChild(b)});window.scrollTo(0,document.body.scrollHeight)},e=>box.textContent=e.message);
+ const send=async()=>{const t=$('tx').value.trim();if(!t)return;$('tx').value='';try{await db.collection('matches/'+m.id+'/messages').add({from:uid,text:t,at:TS()})}catch(e){alert(e.message)}};
+ $('sd').onclick=send;$('tx').onkeydown=e=>{if(e.key==='Enter')send()}}
+
+/* ---- Démarrage ---- */
+auth.onAuthStateChanged(async u=>{
+ stop();if(!u){uid=null;me={};viewAuth();return}
+ uid=u.uid;nav.style.display='flex';spin();
+ try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{}}catch(e){me={}}
+ if(!me.name||!me.gender||!(me.photos&&me.photos.length)){nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==='profile'));viewProfile(true)}else go('swipe')});
+</script></body></html>
