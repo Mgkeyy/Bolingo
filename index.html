@@ -2,54 +2,48 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#e11d48"><title>Bolingo</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:system-ui,sans-serif;background:#fff1f2;color:#1f2937;overscroll-behavior:none}
-header{background:#e11d48;color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700;position:sticky;top:0;z-index:5}
-header button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:20px;padding:6px 12px;font-size:14px}
+header{background:#e11d48;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:20px;font-weight:700;position:sticky;top:0;z-index:5}
+header .lg{display:flex;align-items:center;gap:8px}header button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:20px;padding:6px 12px;font-size:14px}
 main{max-width:480px;margin:0 auto;padding:14px 14px 90px}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #fecdd3;z-index:5}
-nav button{flex:1;padding:10px 4px;border:0;background:none;font-size:12px;color:#6b7280}
-nav button b{display:block;font-size:20px}nav button.on{color:#e11d48;font-weight:700}
+nav button{flex:1;padding:8px 2px;border:0;background:none;font-size:11px;color:#6b7280}nav button b{display:block;font-size:20px}nav button.on{color:#e11d48;font-weight:700}
 input,select,textarea{width:100%;padding:12px;margin:4px 0 10px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;font-family:inherit;background:#fff}
 label{font-size:13px;color:#6b7280}
-.btn{width:100%;padding:13px;border:0;border-radius:12px;background:#e11d48;color:#fff;font-size:16px;font-weight:600;margin-top:6px}
-.btn.s{background:#fff;color:#e11d48;border:1px solid #e11d48}.btn:disabled{opacity:.6}
+.btn{width:100%;padding:13px;border:0;border-radius:12px;background:#e11d48;color:#fff;font-size:16px;font-weight:600;margin-top:8px}.btn.s{background:#fff;color:#e11d48;border:1px solid #e11d48}.btn:disabled{opacity:.5}
 .box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.tabs{display:flex;background:#ffe4e6;border-radius:12px;padding:4px;margin-bottom:14px}
-.tabs button{flex:1;padding:10px;border:0;border-radius:9px;background:none;font-size:15px;color:#9f1239}.tabs .on{background:#fff;font-weight:700}
+.tabs{display:flex;background:#ffe4e6;border-radius:12px;padding:4px;margin-bottom:14px}.tabs button{flex:1;padding:10px;border:0;border-radius:9px;background:none;font-size:15px;color:#9f1239}.tabs .on{background:#fff;font-weight:700}
 .err{color:#b91c1c;font-size:14px;min-height:18px;margin:4px 0}.muted{color:#6b7280;text-align:center}
 .g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stack{position:relative;height:min(68vh,560px);touch-action:none}
+.bar{display:flex;gap:8px;margin-bottom:10px}.bar input{margin:0}.ibt{flex:none;width:48px;border:0;border-radius:12px;background:#fff;font-size:22px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.stack{position:relative;height:min(62vh,540px);touch-action:none}
 .card{position:absolute;inset:0;border-radius:20px;background:#ddd center/cover;box-shadow:0 6px 20px rgba(0,0,0,.2);overflow:hidden;user-select:none;touch-action:none;will-change:transform}
 .card.back{transform:scale(.95) translateY(10px);opacity:.9}
-.info{position:absolute;left:0;right:0;bottom:0;padding:50px 16px 16px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.85))}
-.info h2{margin:0;font-size:26px}.info p{margin:3px 0 0;font-size:14px;opacity:.95}
+.info{position:absolute;left:0;right:0;bottom:0;padding:50px 16px 16px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.85))}.info h2{margin:0;font-size:26px}.info p{margin:3px 0 0;font-size:14px}
 .dots{position:absolute;top:8px;left:8px;right:8px;display:flex;gap:4px}.dots i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.45)}.dots i.on{background:#fff}
-.stamp{position:absolute;top:34px;padding:4px 12px;border:4px solid;border-radius:8px;font-size:30px;font-weight:800;opacity:0;transform:rotate(-12deg)}
-.st-l{left:20px;color:#22c55e;border-color:#22c55e}.st-n{right:20px;color:#ef4444;border-color:#ef4444;transform:rotate(12deg)}
+.stamp{position:absolute;top:34px;padding:4px 12px;border:4px solid;border-radius:8px;font-size:30px;font-weight:800;opacity:0;transform:rotate(-12deg)}.st-l{left:20px;color:#22c55e;border-color:#22c55e}.st-n{right:20px;color:#ef4444;border-color:#ef4444;transform:rotate(12deg)}
+.bdg{position:absolute;top:18px;left:12px;background:#f59e0b;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px}
 .ibtn{position:absolute;right:12px;bottom:78px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.9);font-size:18px}
-.acts{display:flex;justify-content:center;gap:28px;margin-top:16px}
-.acts button{width:66px;height:66px;border-radius:50%;border:0;font-size:28px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.18)}
-.chip{display:inline-block;background:rgba(255,255,255,.25);border-radius:14px;padding:3px 10px;margin:4px 4px 0 0;font-size:12px}
-.chip.d{background:#ffe4e6;color:#9f1239}
+.acts{display:flex;justify-content:center;gap:28px;margin-top:14px}.acts button{width:64px;height:64px;border-radius:50%;border:0;font-size:28px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.chip{display:inline-block;background:rgba(255,255,255,.25);border-radius:14px;padding:3px 10px;margin:4px 4px 0 0;font-size:12px}.chip.d{background:#ffe4e6;color:#9f1239}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:#fff;width:100%;max-width:480px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px}
-.sheet img.big{width:100%;border-radius:14px;margin-bottom:8px}
+.sheet{background:#fff;width:100%;max-width:480px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px}.sheet img.big{width:100%;border-radius:14px;margin-bottom:8px}
 .item{background:#fff;padding:12px;border-radius:14px;margin:8px 0;display:flex;align-items:center;gap:12px}
 .av{width:54px;height:54px;border-radius:50%;background:#fda4af center/cover;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
-.ph{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.ph div{width:30%;aspect-ratio:3/4;border-radius:12px;background:#fecdd3 center/cover;position:relative;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fb7185}
+.ph{display:flex;gap:8px;margin-bottom:10px}.ph div{width:30%;aspect-ratio:3/4;border-radius:12px;background:#fecdd3 center/cover;position:relative;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fb7185}
 .ph div button{position:absolute;top:3px;right:3px;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.6);color:#fff}
-.msgs{display:flex;flex-direction:column;gap:6px;margin:10px 0 70px}
-.m{max-width:78%;padding:9px 12px;border-radius:16px;background:#fff;word-wrap:break-word}.m.me{align-self:flex-end;background:#e11d48;color:#fff}
+.msgs{display:flex;flex-direction:column;gap:6px;margin:10px 0 70px}.m{max-width:78%;padding:9px 12px;border-radius:16px;background:#fff;word-wrap:break-word}.m.me{align-self:flex-end;background:#e11d48;color:#fff}
 .send{position:fixed;bottom:56px;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;padding:8px;display:flex;gap:8px}.send input{margin:0}.send .btn{width:90px;margin:0}
+.stars{font-size:44px;font-weight:800;color:#f59e0b;text-align:center;margin:6px 0}.stars small{font-size:22px}
 .spin{width:34px;height:34px;border:4px solid #fecdd3;border-top-color:#e11d48;border-radius:50%;animation:r 1s linear infinite;margin:40px auto}@keyframes r{to{transform:rotate(360deg)}}
+.hero{text-align:center;margin-bottom:12px}.hero h1{margin:6px 0 0;color:#e11d48}
 </style></head><body>
-<header><span>💞 Bolingo</span><button id="hf" style="display:none">⚙ Filtres</button></header>
-<main id="app"></main>
-<nav id="nav" style="display:none">
-<button data-v="swipe"><b>🔥</b>Découvrir</button><button data-v="matches"><b>💬</b>Matchs</button><button data-v="profile"><b>👤</b>Profil</button></nav>
+<header><span class="lg" id="lg"></span><button id="hf" style="display:none"></button></header>
+<main id="app"></main><nav id="nav" style="display:none"></nav>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -57,159 +51,201 @@ label{font-size:13px;color:#6b7280}
 firebase.initializeApp({apiKey:"AIzaSyBBb6I8jfqQJdbu5nflwyp99G5IdeX86fo",authDomain:"bolingo-e8026.firebaseapp.com",projectId:"bolingo-e8026",storageBucket:"bolingo-e8026.firebasestorage.app",messagingSenderId:"725617425607",appId:"1:725617425607:web:197cf6392d2f74eb5c92e2"});
 const auth=firebase.auth(),db=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp();
 const $=id=>document.getElementById(id),app=$('app'),nav=$('nav');
-let uid=null,me={},unsub=null,flt={};
-try{flt=JSON.parse(localStorage.getItem('bf')||'{}')}catch(e){}
+const LS={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let uid=null,me={},unsub=null,allUsers=[],dip=null,flt={};
+try{flt=JSON.parse(LS.g('bf')||'{}')}catch(e){}
+let lang=LS.g('bl')||((navigator.language||'fr').slice(0,2)==='en'?'en':'fr');
+const rq=new URLSearchParams(location.search).get('ref');if(rq)LS.s('ref',rq);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+/* ---- Langue ---- */
+const EN={'Connexion':'Log in','Inscription':'Sign up','E-mail':'Email','Mot de passe':'Password','Se connecter':'Log in','Créer mon compte':'Create my account','Continuer avec Google':'Continue with Google','Mot de passe oublié ?':'Forgot password?','Rencontres':'Dating','Découvrir':'Discover','Matchs':'Matches','Profil':'Profile','Réglages':'Settings','Filtres':'Filters','Inviter':'Invite',
+'Crée ton profil':'Create your profile','Mon profil':'My profile','Prénom *':'First name *','Nom':'Last name','Genre *':'Gender *','Je recherche':'I’m looking for','Date de naissance * (18 ans min.)':'Date of birth * (18+)','Commune / Ville':'City / Area','Taille (cm)':'Height (cm)','Poste / Profession':'Job / Profession','Université / École':'University / School','Église / Communauté':'Church / Community','Religion':'Religion','Centres d’intérêt (séparés par des virgules)':'Interests (comma-separated)','À propos de moi':'About me','Enregistrer':'Save','Se déconnecter':'Log out','Photos (1 à 3, la première est la principale)':'Photos (1 to 3, the first is the main one)',
+'Homme':'Man','Femme':'Woman','Tous':'Everyone','Chrétien':'Christian','Catholique':'Catholic','Protestant':'Protestant','Musulman':'Muslim','Kimbanguiste':'Kimbanguist','Autre':'Other','Sans religion':'No religion',
+'Rechercher un profil…':'Search a profile…','Aucun résultat':'No results','Plus personne pour l’instant':'No one left for now','Élargis tes filtres ou reviens plus tard.':'Widen your filters or come back later.','Actualiser':'Refresh','Fermer':'Close','Signaler ce profil':'Report this profile','♥ Liker':'♥ Like',
+'Genre':'Gender','Commune':'City','Taille':'Height','Profession':'Job','Église':'Church','Recherche':'Looking for','Filtres de recherche':'Search filters','Âge min.':'Min age','Âge max.':'Max age','Taille min. (cm)':'Min height (cm)','Centre d’intérêt':'Interest','Appliquer':'Apply','Réinitialiser':'Reset',
+'Pas encore de match':'No matches yet','Continue à swiper !':'Keep swiping!','Mes matchs':'My matches','Envoyer':'Send','Message…':'Message…','C’est un match ! 💞':'It’s a match! 💞','Envoyer un message':'Send a message','Continuer':'Continue',
+'Étoiles & invitations':'Stars & invitations','Partager mon lien':'Share my link','Langue':'Language','Photo illisible.':'Unreadable photo.','Le prénom est obligatoire.':'First name is required.','Choisis ton genre.':'Choose your gender.','Tu dois avoir 18 ans ou plus.':'You must be 18 or older.','Ajoute au moins une photo.':'Add at least one photo.','Installer l’application':'Install the app'};
+const t=s=>lang==='en'&&EN[s]?EN[s]:s,L=(f,e)=>lang==='en'?e:f;
+const ERR={'auth/invalid-credential':['E-mail ou mot de passe incorrect.','Wrong email or password.'],'auth/invalid-email':['Adresse e-mail invalide.','Invalid email address.'],'auth/email-already-in-use':['Cet e-mail a déjà un compte. Connecte-toi.','This email already has an account. Log in.'],'auth/weak-password':['Mot de passe trop court (6 caractères min.).','Password too short (6+ characters).'],'auth/too-many-requests':['Trop d’essais. Réessaie plus tard.','Too many attempts. Try again later.'],'auth/network-request-failed':['Pas de connexion internet.','No internet connection.'],'auth/popup-closed-by-user':['','']};
+const fr=e=>ERR[e.code]?ERR[e.code][lang==='en'?1:0]:e.message;
+
+const LOGO=(s=30,inv)=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><defs><linearGradient id="lgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#be123c"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="${inv?'#fff':'url(#lgg)'}"/><path d="M50 78C26 60 20 46 20 36c0-9 7-15 15-15 6 0 12 3 15 9 3-6 9-9 15-9 8 0 15 6 15 15 0 10-6 24-30 42z" fill="${inv?'#e11d48':'#fff'}"/></svg>`;
 const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML};
 const age=b=>{if(!b)return null;const d=new Date(b),n=new Date();let a=n.getFullYear()-d.getFullYear();if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--;return a};
 const bg=u=>u.photos&&u.photos[0]?`background-image:url(${u.photos[0]})`:'';
+const bst=u=>(u.boostUntil||0)>Date.now();
 const stop=()=>{if(unsub){unsub();unsub=null}};
 const spin=()=>app.innerHTML='<div class="spin"></div>';
-const ERR={'auth/invalid-credential':'E-mail ou mot de passe incorrect.','auth/invalid-email':'Adresse e-mail invalide.','auth/email-already-in-use':'Cet e-mail a déjà un compte. Connecte-toi.','auth/weak-password':'Mot de passe trop court (6 caractères min.).','auth/too-many-requests':'Trop d’essais. Réessaie plus tard.','auth/popup-closed-by-user':'','auth/network-request-failed':'Pas de connexion internet.','auth/missing-password':'Entre ton mot de passe.'};
-const fr=e=>ERR[e.code]!==undefined?ERR[e.code]:e.message;
+function buildNav(){$('lg').innerHTML=LOGO(30,1)+' Bolingo';$('hf').textContent='🎛 '+t('Filtres');
+ nav.innerHTML=[['swipe','🔥','Découvrir'],['matches','💬','Matchs'],['profile','👤','Profil'],['settings','⚙️','Réglages']].map(x=>`<button data-v="${x[0]}"><b>${x[1]}</b>${t(x[2])}</button>`).join('')}
 nav.onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-function go(v,a){stop();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,matches:viewMatches,profile:()=>viewProfile(),chat:()=>viewChat(a)})[v]()}
+function go(v,a){stop();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,matches:viewMatches,profile:()=>viewProfile(),settings:viewSettings,chat:()=>viewChat(a)})[v]()}
 
 /* ---- Connexion ---- */
 function viewAuth(mode='in'){
- nav.style.display='none';$('hf').style.display='none';
- app.innerHTML=`<div class="box"><div class="tabs"><button id="t1" class="${mode==='in'?'on':''}">Connexion</button><button id="t2" class="${mode==='up'?'on':''}">Inscription</button></div>
- <form id="f"><input id="em" type="email" placeholder="E-mail" autocomplete="email" required>
- <input id="pw" type="password" placeholder="Mot de passe" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
- <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?'Se connecter':'Créer mon compte'}</button></form>
- <button class="btn s" id="gg">Continuer avec Google</button>
- ${mode==='in'?'<p class="muted"><a href="#" id="fg">Mot de passe oublié ?</a></p>':''}</div>`;
+ nav.style.display='none';$('hf').style.display='none';buildNav();
+ app.innerHTML=`<div class="box"><div class="hero">${LOGO(72)}<h1>Bolingo</h1><div class="muted">${t('Rencontres')}</div></div>
+ <div class="tabs"><button id="t1" class="${mode==='in'?'on':''}">${t('Connexion')}</button><button id="t2" class="${mode==='up'?'on':''}">${t('Inscription')}</button></div>
+ <form id="f"><input id="em" type="email" placeholder="${t('E-mail')}" autocomplete="email" required>
+ <input id="pw" type="password" placeholder="${t('Mot de passe')}" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
+ <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?t('Se connecter'):t('Créer mon compte')}</button></form>
+ <button class="btn s" id="gg">${t('Continuer avec Google')}</button>
+ ${mode==='in'?`<p class="muted"><a href="#" id="fg">${t('Mot de passe oublié ?')}</a></p>`:''}
+ <p class="muted"><a href="#" id="lg2">${lang==='fr'?'English':'Français'}</a></p></div>`;
  $('t1').onclick=()=>viewAuth('in');$('t2').onclick=()=>viewAuth('up');
+ $('lg2').onclick=e=>{e.preventDefault();setLang(lang==='fr'?'en':'fr',()=>viewAuth(mode))};
  const er=m=>$('err').textContent=m;
  $('f').onsubmit=async e=>{e.preventDefault();$('go').disabled=true;er('');
-  try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}
-  catch(x){er(fr(x));$('go').disabled=false}};
+  try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}catch(x){er(fr(x));$('go').disabled=false}};
  $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};
- if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er('Entre ton e-mail puis touche « Mot de passe oublié ».');
-  try{await auth.sendPasswordResetEmail(a);er('');alert('E-mail de réinitialisation envoyé.')}catch(x){er(fr(x))}};
-}
+ if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er(L('Entre ton e-mail puis touche « Mot de passe oublié ».','Enter your email then tap “Forgot password?”.'));
+  try{await auth.sendPasswordResetEmail(a);er('');alert(L('E-mail de réinitialisation envoyé.','Reset email sent.'))}catch(x){er(fr(x))}}}
+function setLang(l,cb){lang=l;LS.s('bl',l);document.documentElement.lang=l;buildNav();cb()}
 
 /* ---- Profil ---- */
 const REL=['','Chrétien','Catholique','Protestant','Musulman','Kimbanguiste','Autre','Sans religion'];
-function resize(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onerror=ko;r.onload=()=>{const i=new Image();i.onerror=ko;i.onload=()=>{const m=640,k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};i.src=r.result};r.readAsDataURL(file)})}
+function resize(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onerror=ko;r.onload=()=>{const i=new Image();i.onerror=ko;i.onload=()=>{const k=Math.min(1,640/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};i.src=r.result};r.readAsDataURL(file)})}
+async function claimRef(){const r=LS.g('ref');if(r&&r!==uid){try{await db.doc('referrals/'+uid).set({inviter:r,at:TS()})}catch(e){}}LS.s('ref','')}
 function viewProfile(first){
  const p=me,photos=[...(p.photos||[])];
- const sel=(id,opts,v)=>`<select id="${id}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
- const inp=(id,l,v,t='text',x='')=>`<label>${l}</label><input id="${id}" type="${t}" value="${esc(v)}" ${x}>`;
- app.innerHTML=`<div class="box"><h2 style="margin-top:0">${first?'Crée ton profil':'Mon profil'}</h2>
- <label>Photos (1 à 3, la première est la principale)</label><div class="ph" id="ph"></div>
- <input id="file" type="file" accept="image/*" style="display:none">
+ const sel=(id,o,v)=>`<select id="${id}">${o.map(x=>`<option value="${x}" ${x===v?'selected':''}>${x?t(x):''}</option>`).join('')}</select>`;
+ const inp=(id,l,v,ty='text',x='')=>`<label>${t(l)}</label><input id="${id}" type="${ty}" value="${esc(v)}" ${x}>`;
+ app.innerHTML=`<div class="box"><h2 style="margin-top:0">${first?t('Crée ton profil'):t('Mon profil')}</h2>
+ <label>${t('Photos (1 à 3, la première est la principale)')}</label><div class="ph" id="ph"></div><input id="file" type="file" accept="image/*" style="display:none">
  <div class="g">${inp('name','Prénom *',p.name,'text','maxlength=40')}${inp('lastName','Nom',p.lastName,'text','maxlength=40')}</div>
- <div class="g"><div><label>Genre *</label>${sel('gender',['','Homme','Femme'],p.gender)}</div><div><label>Je recherche</label>${sel('seeking',['Tous','Homme','Femme'],p.seeking||'Tous')}</div></div>
+ <div class="g"><div><label>${t('Genre *')}</label>${sel('gender',['','Homme','Femme'],p.gender)}</div><div><label>${t('Je recherche')}</label>${sel('seeking',['Tous','Homme','Femme'],p.seeking||'Tous')}</div></div>
  ${inp('birth','Date de naissance * (18 ans min.)',p.birth,'date')}
  <div class="g">${inp('city','Commune / Ville',p.city)}${inp('height','Taille (cm)',p.height,'number','min=120 max=230')}</div>
  ${inp('job','Poste / Profession',p.job)}${inp('school','Université / École',p.school)}${inp('church','Église / Communauté',p.church)}
- <label>Religion</label>${sel('religion',REL,p.religion)}
+ <label>${t('Religion')}</label>${sel('religion',REL,p.religion)}
  ${inp('interests','Centres d’intérêt (séparés par des virgules)',(p.interests||[]).join(', '))}
- <label>À propos de moi</label><textarea id="bio" rows="4" maxlength="400">${esc(p.bio)}</textarea>
- <div class="err" id="err"></div><button class="btn" id="save">Enregistrer</button>
- ${first?'':'<button class="btn s" id="out">Se déconnecter</button>'}</div>`;
+ <label>${t('À propos de moi')}</label><textarea id="bio" rows="4" maxlength="400">${esc(p.bio)}</textarea>
+ <div class="err" id="err"></div><button class="btn" id="save">${t('Enregistrer')}</button></div>`;
  const draw=()=>{$('ph').innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('div');if(photos[i]){d.style.backgroundImage=`url(${photos[i]})`;const b=document.createElement('button');b.textContent='✕';b.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(b)}else{d.textContent='+';d.onclick=()=>$('file').click()}$('ph').appendChild(d)}};draw();
- $('file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{photos.push(await resize(f));draw()}catch(x){$('err').textContent='Photo illisible.'}};
- const v=id=>$(id).value.trim();
- $('save').onclick=async()=>{const er=m=>$('err').textContent=m;
-  if(!v('name'))return er('Le prénom est obligatoire.');if(!$('gender').value)return er('Choisis ton genre.');
-  const a=age(v('birth'));if(a===null||a<18)return er('Tu dois avoir 18 ans ou plus.');if(!photos.length)return er('Ajoute au moins une photo.');
+ $('file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{photos.push(await resize(f));draw()}catch(x){$('err').textContent=t('Photo illisible.')}};
+ const v=id=>$(id).value.trim(),er=m=>$('err').textContent=m;
+ $('save').onclick=async()=>{
+  if(!v('name'))return er(t('Le prénom est obligatoire.'));if(!$('gender').value)return er(t('Choisis ton genre.'));
+  const a=age(v('birth'));if(a===null||a<18)return er(t('Tu dois avoir 18 ans ou plus.'));if(!photos.length)return er(t('Ajoute au moins une photo.'));
   const d={name:v('name'),lastName:v('lastName'),gender:$('gender').value,seeking:$('seeking').value,birth:v('birth'),city:v('city'),height:Number(v('height'))||null,job:v('job'),school:v('school'),church:v('church'),religion:$('religion').value,interests:v('interests').split(',').map(s=>s.trim()).filter(Boolean).slice(0,12),bio:v('bio'),photos};
-  $('save').disabled=true;try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};go('swipe')}catch(x){er(x.message);$('save').disabled=false}};
- if($('out'))$('out').onclick=()=>auth.signOut();
-}
+  const isNew=!me.name;$('save').disabled=true;
+  try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};if(isNew)await claimRef();go('swipe')}catch(x){er(x.message);$('save').disabled=false}}}
 
 /* ---- Découvrir ---- */
 function pass(u){
  if(u.id===uid||!u.name||!(u.photos&&u.photos.length))return false;
- const a=age(u.birth),L=s=>(s||'').toLowerCase();
+ const a=age(u.birth),Lw=s=>(s||'').toLowerCase();
  if(me.seeking&&me.seeking!=='Tous'&&u.gender!==me.seeking)return false;
  if(u.seeking&&u.seeking!=='Tous'&&me.gender&&me.gender!==u.seeking)return false;
- if(flt.amin&&a<flt.amin)return false;if(flt.amax&&a>flt.amax)return false;
- if(flt.hmin&&(u.height||0)<flt.hmin)return false;
- if(flt.city&&!L(u.city).includes(L(flt.city)))return false;
- if(flt.school&&!L(u.school).includes(L(flt.school)))return false;
- if(flt.church&&!L(u.church).includes(L(flt.church)))return false;
- if(flt.religion&&u.religion!==flt.religion)return false;
- if(flt.interest&&!(u.interests||[]).some(i=>L(i).includes(L(flt.interest))))return false;
- return true}
+ if(flt.amin&&a<flt.amin)return false;if(flt.amax&&a>flt.amax)return false;if(flt.hmin&&(u.height||0)<flt.hmin)return false;
+ if(flt.city&&!Lw(u.city).includes(Lw(flt.city)))return false;if(flt.school&&!Lw(u.school).includes(Lw(flt.school)))return false;if(flt.church&&!Lw(u.church).includes(Lw(flt.church)))return false;
+ if(flt.religion&&u.religion!==flt.religion)return false;if(flt.interest&&!(u.interests||[]).some(i=>Lw(i).includes(Lw(flt.interest))))return false;return true}
+const hay=u=>[u.name,u.lastName,u.city,u.job,u.school,u.church,u.religion,(u.interests||[]).join(' ')].join(' ').toLowerCase();
+async function doSwipe(u,type){await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS()});
+ if(type==='like'){const b=await db.doc('swipes/'+u.id+'_'+uid).get();if(b.exists&&b.data().type==='like'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});return true}}return false}
 async function viewSwipe(){
- spin();
+ app.innerHTML=`<div class="bar"><input id="q" type="search" placeholder="🔍 ${t('Rechercher un profil…')}"><button class="ibt" id="inv" title="${t('Inviter')}">⭐</button></div><div id="res"></div><div id="dk"><div class="spin"></div></div>`;
+ $('inv').onclick=share;
+ $('q').oninput=e=>{const q=e.target.value.trim().toLowerCase();$('dk').style.display=q?'none':'';$('res').innerHTML='';if(!q)return;
+  const r=allUsers.filter(u=>u.id!==uid&&u.name&&hay(u).includes(q)).slice(0,30);
+  if(!r.length){$('res').innerHTML=`<p class="muted">${t('Aucun résultat')}</p>`;return}
+  r.forEach(u=>{const it=document.createElement('div');it.className='item';it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc(u.name[0])}</div><div><b>${esc(u.name)} ${esc(u.lastName)}${age(u.birth)?', '+age(u.birth):''}</b><div class="muted" style="text-align:left;font-size:13px">${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</div></div>`;it.onclick=()=>detail(u,{like:1});$('res').appendChild(it)})};
  try{const done=new Set();(await db.collection('swipes').where('from','==',uid).get()).forEach(d=>done.add(d.data().to));
-  const deck=[];(await db.collection('users').limit(80).get()).forEach(d=>{const u={id:d.id,...d.data()};if(!done.has(u.id)&&pass(u))deck.push(u)});
-  deck.sort(()=>Math.random()-.5);showDeck(deck)}catch(e){app.innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
-function cardHTML(u,back){const n=(u.photos||[]).length;
- return `<div class="card ${back?'back':''}" style="${bg(u)}">${back?'':`<div class="dots">${(u.photos||[]).map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div><div class="stamp st-l">LIKE</div><div class="stamp st-n">NOPE</div><button class="ibtn">ℹ</button>`}
+  allUsers=[];(await db.collection('users').limit(200).get()).forEach(d=>allUsers.push({id:d.id,...d.data()}));
+  const deck=allUsers.filter(u=>!done.has(u.id)&&pass(u)).sort(()=>Math.random()-.5).sort((a,b)=>bst(b)-bst(a));showDeck(deck)}
+ catch(e){$('dk').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
+function cardHTML(u,back){
+ return `<div class="card ${back?'back':''}" style="${bg(u)}">${back?'':`<div class="dots">${(u.photos||[]).map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>${bst(u)?'<div class="bdg">⭐ Boost</div>':''}<div class="stamp st-l">LIKE</div><div class="stamp st-n">NOPE</div><button class="ibtn">ℹ</button>`}
  <div class="info"><h2>${esc(u.name)}${age(u.birth)?', '+age(u.birth):''}</h2><p>${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</p>${(u.interests||[]).slice(0,4).map(i=>`<span class="chip">${esc(i)}</span>`).join('')}</div></div>`}
 function showDeck(deck){
- if(!deck.length){app.innerHTML='<div class="box muted"><h2>Plus personne pour l’instant</h2><p>Élargis tes filtres ou reviens plus tard.</p><button class="btn" id="r">Actualiser</button></div>';$('r').onclick=viewSwipe;return}
- const u=deck[0];
- app.innerHTML=`<div class="stack" id="st">${deck[1]?cardHTML(deck[1],1):''}${cardHTML(u)}</div><div class="acts"><button id="no">✕</button><button id="yes">♥</button></div>`;
- const c=app.querySelectorAll('.card');const top=c[c.length-1],sl=top.querySelector('.st-l'),sn=top.querySelector('.st-n'),dots=top.querySelectorAll('.dots i');let pi=0,busy=false;
+ const dk=$('dk');if(!dk)return;
+ if(!deck.length){dk.innerHTML=`<div class="box muted"><h2>${t('Plus personne pour l’instant')}</h2><p>${t('Élargis tes filtres ou reviens plus tard.')}</p><button class="btn" id="r">${t('Actualiser')}</button></div>`;$('r').onclick=viewSwipe;return}
+ const u=deck[0];dk.innerHTML=`<div class="stack">${deck[1]?cardHTML(deck[1],1):''}${cardHTML(u)}</div><div class="acts"><button id="no">✕</button><button id="yes">♥</button></div>`;
+ const c=dk.querySelectorAll('.card'),top=c[c.length-1],sl=top.querySelector('.st-l'),sn=top.querySelector('.st-n'),dots=top.querySelectorAll('.dots i');let pi=0,busy=false;
  const next=()=>{deck.shift();showDeck(deck)};
- const act=async(type)=>{if(busy)return;busy=true;top.style.transition='transform .35s';top.style.transform=`translate(${type==='like'?600:-600}px,0) rotate(${type==='like'?30:-30}deg)`;
-  try{await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS()});
-   if(type==='like'){const b=await db.doc('swipes/'+u.id+'_'+uid).get();if(b.exists&&b.data().type==='like'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});setTimeout(()=>matchPop(u),250);return setTimeout(next,300)}}}catch(e){alert(e.message)}
-  setTimeout(next,300)};
+ const act=async type=>{if(busy)return;busy=true;top.style.transition='transform .35s';top.style.transform=`translate(${type==='like'?600:-600}px,0) rotate(${type==='like'?30:-30}deg)`;
+  try{if(await doSwipe(u,type))setTimeout(()=>matchPop(u),250)}catch(e){alert(e.message)}setTimeout(next,300)};
  let sx=0,sy=0,dx=0,drag=false,moved=false;
  top.onpointerdown=e=>{if(e.target.closest('.ibtn'))return;drag=true;moved=false;sx=e.clientX;sy=e.clientY;dx=0;top.style.transition='none';top.setPointerCapture(e.pointerId)};
  top.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;const dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>8)moved=true;top.style.transform=`translate(${dx}px,${dy*.4}px) rotate(${dx/18}deg)`;sl.style.opacity=Math.max(0,dx/100);sn.style.opacity=Math.max(0,-dx/100)};
- top.onpointerup=e=>{if(!drag)return;drag=false;
-  if(dx>110)return act('like');if(dx<-110)return act('pass');
+ top.onpointerup=e=>{if(!drag)return;drag=false;if(dx>110)return act('like');if(dx<-110)return act('pass');
   top.style.transition='transform .25s';top.style.transform='';sl.style.opacity=sn.style.opacity=0;
   if(!moved&&u.photos.length>1){const r=top.getBoundingClientRect();pi=(e.clientX-r.left>r.width/2)?(pi+1)%u.photos.length:(pi-1+u.photos.length)%u.photos.length;top.style.backgroundImage=`url(${u.photos[pi]})`;dots.forEach((d,i)=>d.classList.toggle('on',i===pi))}};
- top.querySelector('.ibtn').onclick=()=>detail(u);
- $('no').onclick=()=>act('pass');$('yes').onclick=()=>act('like');
-}
-function detail(u){
- const row=(l,v)=>v?`<p style="margin:6px 0"><b>${l} :</b> ${esc(v)}</p>`:'';
- const o=document.createElement('div');o.className='ov';
- o.innerHTML=`<div class="sheet">${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}<h2 style="margin:6px 0">${esc(u.name)} ${esc(u.lastName)}${age(u.birth)?', '+age(u.birth)+' ans':''}</h2>
+ top.querySelector('.ibtn').onclick=()=>detail(u);$('no').onclick=()=>act('pass');$('yes').onclick=()=>act('like')}
+function detail(u,o){
+ const row=(l,v)=>v?`<p style="margin:6px 0"><b>${t(l)} :</b> ${esc(t(v))}</p>`:'',a=age(u.birth);
+ const ov=document.createElement('div');ov.className='ov';
+ ov.innerHTML=`<div class="sheet">${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}<h2 style="margin:6px 0">${esc(u.name)} ${esc(u.lastName)}${a?', '+a+L(' ans',' yrs'):''}</h2>
  ${row('Genre',u.gender)}${row('Commune',u.city)}${row('Taille',u.height?u.height+' cm':'')}${row('Profession',u.job)}${row('Université / École',u.school)}${row('Église',u.church)}${row('Religion',u.religion)}${row('Recherche',u.seeking)}
  ${(u.interests||[]).map(i=>`<span class="chip d">${esc(i)}</span>`).join('')}<p>${esc(u.bio)}</p>
- <button class="btn" id="cl">Fermer</button><button class="btn s" id="rp">Signaler ce profil</button></div>`;
- document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cl').onclick=()=>o.remove();
- $('rp').onclick=async()=>{try{await db.collection('reports').add({from:uid,about:u.id,at:TS()});alert('Merci, le profil a été signalé.')}catch(e){alert(e.message)}o.remove()};
-}
+ ${o&&o.like?`<button class="btn" id="lk">${t('♥ Liker')}</button>`:''}<button class="btn s" id="cl">${t('Fermer')}</button>${u.id!==uid?`<button class="btn s" id="rp" style="border-color:#9ca3af;color:#6b7280">${t('Signaler ce profil')}</button>`:''}</div>`;
+ document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov)ov.remove()};$('cl').onclick=()=>ov.remove();
+ if($('lk'))$('lk').onclick=async()=>{ov.remove();try{if(await doSwipe(u,'like'))matchPop(u);else alert(L('Like envoyé ♥','Like sent ♥'))}catch(e){alert(e.message)}};
+ if($('rp'))$('rp').onclick=async()=>{try{await db.collection('reports').add({from:uid,about:u.id,at:TS()});alert(L('Merci, le profil a été signalé.','Thanks, the profile was reported.'))}catch(e){alert(e.message)}ov.remove()}}
 function matchPop(u){const o=document.createElement('div');o.className='ov';o.style.alignItems='center';
- o.innerHTML=`<div class="box" style="text-align:center;margin:20px"><h1 style="color:#e11d48;margin:0">C’est un match ! 💞</h1><p>Toi et ${esc(u.name)} vous plaisez mutuellement.</p>
- <div class="av" style="width:110px;height:110px;margin:10px auto;${bg(u)}"></div><button class="btn" id="m1">Envoyer un message</button><button class="btn s" id="m2">Continuer</button></div>`;
+ o.innerHTML=`<div class="box" style="text-align:center;margin:20px"><h1 style="color:#e11d48;margin:0">${t('C’est un match ! 💞')}</h1><p>${L('Toi et '+esc(u.name)+' vous plaisez mutuellement.','You and '+esc(u.name)+' like each other.')}</p><div class="av" style="width:110px;height:110px;margin:10px auto;${bg(u)}"></div><button class="btn" id="m1">${t('Envoyer un message')}</button><button class="btn s" id="m2">${t('Continuer')}</button></div>`;
  document.body.appendChild(o);$('m2').onclick=()=>o.remove();$('m1').onclick=()=>{o.remove();go('chat',{id:[uid,u.id].sort().join('_'),u})}}
 $('hf').onclick=()=>{
  const o=document.createElement('div');o.className='ov';const f=flt;
- o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">Filtres de recherche</h3>
- <div class="g"><div><label>Âge min.</label><input id="a1" type="number" value="${f.amin||''}"></div><div><label>Âge max.</label><input id="a2" type="number" value="${f.amax||''}"></div></div>
- <label>Taille min. (cm)</label><input id="h1" type="number" value="${f.hmin||''}"><label>Commune / Ville</label><input id="c1" value="${esc(f.city)}">
- <label>Université / École</label><input id="s1" value="${esc(f.school)}"><label>Église</label><input id="e1" value="${esc(f.church)}">
- <label>Religion</label><select id="r1">${REL.map(r=>`<option ${r===f.religion?'selected':''}>${r}</option>`).join('')}</select>
- <label>Centre d’intérêt</label><input id="i1" value="${esc(f.interest)}">
- <button class="btn" id="ap">Appliquer</button><button class="btn s" id="rs">Réinitialiser</button></div>`;
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${t('Filtres de recherche')}</h3>
+ <div class="g"><div><label>${t('Âge min.')}</label><input id="a1" type="number" value="${f.amin||''}"></div><div><label>${t('Âge max.')}</label><input id="a2" type="number" value="${f.amax||''}"></div></div>
+ <label>${t('Taille min. (cm)')}</label><input id="h1" type="number" value="${f.hmin||''}"><label>${t('Commune / Ville')}</label><input id="c1" value="${esc(f.city)}">
+ <label>${t('Université / École')}</label><input id="s1" value="${esc(f.school)}"><label>${t('Église')}</label><input id="e1" value="${esc(f.church)}">
+ <label>${t('Religion')}</label><select id="r1">${REL.map(r=>`<option value="${r}" ${r===f.religion?'selected':''}>${r?t(r):''}</option>`).join('')}</select>
+ <label>${t('Centre d’intérêt')}</label><input id="i1" value="${esc(f.interest)}">
+ <button class="btn" id="ap">${t('Appliquer')}</button><button class="btn s" id="rs">${t('Réinitialiser')}</button></div>`;
  document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};
- const done=()=>{try{localStorage.setItem('bf',JSON.stringify(flt))}catch(e){}o.remove();viewSwipe()};
+ const done=()=>{LS.s('bf',JSON.stringify(flt));o.remove();viewSwipe()};
  $('ap').onclick=()=>{flt={amin:+$('a1').value||0,amax:+$('a2').value||0,hmin:+$('h1').value||0,city:$('c1').value.trim(),school:$('s1').value.trim(),church:$('e1').value.trim(),religion:$('r1').value,interest:$('i1').value.trim()};done()};
  $('rs').onclick=()=>{flt={};done()}};
+
+/* ---- Partage & étoiles ---- */
+async function share(){
+ const url=location.origin+location.pathname+'?ref='+uid,text=L('Rejoins-moi sur Bolingo, l’appli de rencontres !','Join me on Bolingo, the dating app!');
+ if(navigator.share){try{await navigator.share({title:'Bolingo',text,url});return}catch(e){if(e.name==='AbortError')return}}
+ try{await navigator.clipboard.writeText(url);alert(L('Lien copié :\n','Link copied:\n')+url)}catch(e){prompt(L('Copie ce lien :','Copy this link:'),url)}}
+async function viewSettings(){
+ spin();let n=0;try{n=(await db.collection('referrals').where('inviter','==',uid).get()).size}catch(e){}
+ const bal=n*5-(me.spent||0),on=bst(me);
+ app.innerHTML=`<div class="box"><h3 style="margin-top:0">⭐ ${t('Étoiles & invitations')}</h3>
+ <p class="muted" style="margin:0">${L('Invite tes amis : tu gagnes 5 étoiles pour chaque personne qui s’inscrit avec ton lien. Les étoiles servent à mettre ton profil en avant.','Invite friends: earn 5 stars for each person who signs up with your link. Stars push your profile to the top.')}</p>
+ <div class="stars">${bal}<small> ⭐</small></div><p class="muted" style="margin:0">${L(n+' personne(s) invitée(s)',n+' friend(s) invited')}</p>
+ <button class="btn" id="sh">${t('Partager mon lien')}</button>
+ <button class="btn s" id="bo" ${bal<5?'disabled':''}>🚀 ${L('Booster mon profil 24 h (5 ⭐)','Boost my profile for 24h (5 ⭐)')}</button>
+ ${on?`<p class="muted">${L('Boost actif jusqu’au ','Boost active until ')}${new Date(me.boostUntil).toLocaleString(lang)}</p>`:''}</div>
+ <div class="box" style="margin-top:12px"><h3 style="margin-top:0">🌐 ${t('Langue')}</h3><div class="g"><button class="btn ${lang==='fr'?'':'s'}" id="lf" style="margin:0">Français</button><button class="btn ${lang==='en'?'':'s'}" id="le" style="margin:0">English</button></div></div>
+ <div class="box" style="margin-top:12px">${dip?`<button class="btn" id="ins" style="margin-top:0">📲 ${t('Installer l’application')}</button>`:`<p class="muted" style="margin:0">📲 ${L('Installer l’application : menu ⋮ de Chrome → « Ajouter à l’écran d’accueil » (ou « Installer l’application »).','Install the app: Chrome menu ⋮ → “Add to Home screen” (or “Install app”).')}</p>`}
+ <p class="muted" style="font-size:13px">${esc(auth.currentUser&&auth.currentUser.email||'')}</p><button class="btn s" id="out">${t('Se déconnecter')}</button></div>`;
+ $('sh').onclick=share;$('out').onclick=()=>auth.signOut();
+ $('lf').onclick=()=>setLang('fr',()=>go('settings'));$('le').onclick=()=>setLang('en',()=>go('settings'));
+ if($('ins'))$('ins').onclick=async()=>{dip.prompt();await dip.userChoice;dip=null;viewSettings()};
+ $('bo').onclick=async()=>{const d={spent:(me.spent||0)+5,boostUntil:Math.max(Date.now(),me.boostUntil||0)+864e5};
+  try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};alert(L('Ton profil est boosté pour 24 h ! 🚀','Your profile is boosted for 24h! 🚀'));viewSettings()}catch(e){alert(e.message)}}}
 
 /* ---- Matchs & chat ---- */
 async function viewMatches(){
  spin();
  try{const s=await db.collection('matches').where('users','array-contains',uid).get();
-  if(s.empty){app.innerHTML='<div class="box muted"><h2>Pas encore de match</h2><p>Continue à swiper !</p></div>';return}
-  app.innerHTML='<h3>Mes matchs</h3><div id="l"></div>';
-  for(const m of s.docs){const oid=m.data().users.find(x=>x!==uid),d=await db.doc('users/'+oid).get(),u=d.exists?{id:oid,...d.data()}:{id:oid,name:'Utilisateur'};
+  if(s.empty){app.innerHTML=`<div class="box muted"><h2>${t('Pas encore de match')}</h2><p>${t('Continue à swiper !')}</p></div>`;return}
+  app.innerHTML=`<h3>${t('Mes matchs')}</h3><div id="l"></div>`;
+  for(const m of s.docs){const oid=m.data().users.find(x=>x!==uid),d=await db.doc('users/'+oid).get(),u=d.exists?{id:oid,...d.data()}:{id:oid,name:'?'};
    const it=document.createElement('div');it.className='item';it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div><b>${esc(u.name)}</b><div class="muted" style="text-align:left;font-size:13px">${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</div></div>`;
    it.onclick=()=>go('chat',{id:m.id,u});$('l').appendChild(it)}}catch(e){app.innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
 function viewChat(m){
- app.innerHTML=`<div class="item" style="margin-top:0"><button class="btn s" id="bk" style="width:auto;margin:0;padding:8px 12px">←</button><div class="av" style="width:42px;height:42px;${bg(m.u)}"></div><b style="flex:1">${esc(m.u.name)}</b><button class="btn s" id="pf" style="width:auto;margin:0;padding:8px 12px">Profil</button></div>
- <div class="msgs" id="ms"></div><div class="send"><input id="tx" maxlength="1000" placeholder="Message…"><button class="btn" id="sd">Envoyer</button></div>`;
+ app.innerHTML=`<div class="item" style="margin-top:0"><button class="btn s" id="bk" style="width:auto;margin:0;padding:8px 12px">←</button><div class="av" style="width:42px;height:42px;${bg(m.u)}"></div><b style="flex:1">${esc(m.u.name)}</b><button class="btn s" id="pf" style="width:auto;margin:0;padding:8px 12px">${t('Profil')}</button></div>
+ <div class="msgs" id="ms"></div><div class="send"><input id="tx" maxlength="1000" placeholder="${t('Message…')}"><button class="btn" id="sd">${t('Envoyer')}</button></div>`;
  $('bk').onclick=()=>go('matches');$('pf').onclick=()=>detail(m.u);
  const box=$('ms');unsub=db.collection('matches/'+m.id+'/messages').orderBy('at').onSnapshot(s=>{box.innerHTML='';s.forEach(d=>{const x=d.data(),b=document.createElement('div');b.className='m'+(x.from===uid?' me':'');b.textContent=x.text;box.appendChild(b)});window.scrollTo(0,document.body.scrollHeight)},e=>box.textContent=e.message);
- const send=async()=>{const t=$('tx').value.trim();if(!t)return;$('tx').value='';try{await db.collection('matches/'+m.id+'/messages').add({from:uid,text:t,at:TS()})}catch(e){alert(e.message)}};
+ const send=async()=>{const tx=$('tx').value.trim();if(!tx)return;$('tx').value='';try{await db.collection('matches/'+m.id+'/messages').add({from:uid,text:tx,at:TS()})}catch(e){alert(e.message)}};
  $('sd').onclick=send;$('tx').onkeydown=e=>{if(e.key==='Enter')send()}}
 
 /* ---- Démarrage ---- */
+document.documentElement.lang=lang;buildNav();
 auth.onAuthStateChanged(async u=>{
  stop();if(!u){uid=null;me={};viewAuth();return}
- uid=u.uid;nav.style.display='flex';spin();
+ uid=u.uid;nav.style.display='flex';buildNav();spin();
  try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{}}catch(e){me={}}
  if(!me.name||!me.gender||!(me.photos&&me.photos.length)){nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==='profile'));viewProfile(true)}else go('swipe')});
 </script></body></html>
