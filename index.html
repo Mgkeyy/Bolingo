@@ -45,8 +45,15 @@ label{font-size:13px;color:var(--mu)}
 .post{background:var(--card);border-radius:16px;padding:12px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.06)}.post .h{display:flex;gap:10px;align-items:center}.post .h .av{width:40px;height:40px;font-size:18px}.post img.pi{width:100%;border-radius:12px;margin-top:8px}.post .a{display:flex;gap:18px;margin-top:8px}.post .a button{background:none;border:0;color:var(--mu);font-size:15px;padding:4px 0}.post .a .on{color:#e11d48}
 .view{position:fixed;inset:0;background:#000;z-index:30;display:flex;flex-direction:column;justify-content:center;color:#fff}.view img{width:100%;max-height:78vh;object-fit:contain}
 .sw{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px var(--card);margin-left:6px}
+.vf{display:inline-block;background:#3b82f6;color:#fff;border-radius:50%;width:18px;height:18px;font-size:12px;line-height:18px;text-align:center;margin-left:6px;vertical-align:middle}
+.bd{background:#f59e0b;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px;font-style:normal}.bd:empty{display:none}
+nav button{position:relative}nav .bd{position:absolute;top:2px;right:18%;margin:0}
+.toast{position:fixed;top:64px;left:12px;right:12px;max-width:456px;margin:0 auto;background:#111827;color:#fff;padding:12px 14px;border-radius:14px;z-index:50;animation:drop .3s;box-shadow:0 8px 24px rgba(0,0,0,.3)}@keyframes drop{from{transform:translateY(-30px);opacity:0}}
+.fl{position:fixed;z-index:60;font-size:34px;pointer-events:none;animation:up 1.1s ease-out forwards}@keyframes up{0%{opacity:1;transform:translateY(0) scale(.6)}100%{opacity:0;transform:translateY(-170px) scale(1.6)}}
+.acts button{transition:transform .15s}.acts button:active,.btn:active{transform:scale(.9)}.acts .sm{font-size:26px;background:linear-gradient(135deg,#f59e0b,#ef4444)}
 </style></head><body>
-<header><span class="lg" id="lg"></span><button id="hf" style="display:none"></button></header>
+<header><span class="lg" id="lg"></span><span><button id="hb" style="display:none">🔔<b id="bn" class="bd"></b></button> <button id="hf" style="display:none"></button></span></header>
 <main id="app"></main><nav id="nav" style="display:none"></nav>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -56,7 +63,7 @@ firebase.initializeApp({apiKey:"AIzaSyBBb6I8jfqQJdbu5nflwyp99G5IdeX86fo",authDom
 const auth=firebase.auth(),db=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp();
 const $=id=>document.getElementById(id),app=$('app'),nav=$('nav');
 const LS={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
-let uid=null,me={},unsub=null,allUsers=[],dip=null,flt={},blocked=new Set(),favs=new Set(),mtab='m';
+let uid=null,me={},unsub=null,allUsers=[],dip=null,flt={},blocked=new Set(),favs=new Set(),mtab='m',nots=[],mats=[],isAdm=false,unL=null,chatOpen=null,atab='t';
 try{flt=JSON.parse(LS.g('bf')||'{}')}catch(e){}
 let lang=LS.g('bl')||((navigator.language||'fr').slice(0,2)==='en'?'en':'fr');
 const rq=new URLSearchParams(location.search).get('ref');if(rq)LS.s('ref',rq);
@@ -71,9 +78,9 @@ const EN={'Connexion':'Log in','Inscription':'Sign up','E-mail':'Email','Mot de 
 'Genre':'Gender','Commune':'City','Taille':'Height','Profession':'Job','Église':'Church','Recherche':'Looking for','Filtres de recherche':'Search filters','Âge min.':'Min age','Âge max.':'Max age','Taille min. (cm)':'Min height (cm)','Centre d’intérêt':'Interest','Appliquer':'Apply','Réinitialiser':'Reset',
 'Pas encore de match':'No matches yet','Continue à swiper !':'Keep swiping!','Mes matchs':'My matches','Envoyer':'Send','Message…':'Message…','C’est un match ! 💞':'It’s a match! 💞','Envoyer un message':'Send a message','Continuer':'Continue',
 'Étoiles & invitations':'Stars & invitations','Partager mon lien':'Share my link','Langue':'Language','Photo illisible.':'Unreadable photo.','Le prénom est obligatoire.':'First name is required.','Choisis ton genre.':'Choose your gender.','Tu dois avoir 18 ans ou plus.':'You must be 18 or older.','Ajoute au moins une photo.':'Add at least one photo.','Installer l’application':'Install the app',
-'Moments':'Moments','Favoris':'Favorites','Intention':'Intent','Amitié':'Friendship','Relation sérieuse':'Serious relationship','Rencontre amoureuse':'Romantic dating','Discussion':'Chatting','Réseau social':'Social networking','💛 Ajouter aux favoris':'💛 Add to favorites','💛 Retirer des favoris':'💛 Remove from favorites','🚫 Bloquer':'🚫 Block','Mode sombre':'Dark mode','Mode invisible':'Invisible mode','Débloquer':'Unblock','Quoi de neuf ?':'What’s new?','Photo':'Photo','Publier':'Post','Ma story':'My story','Moi':'Me','Commenter':'Comment','Commentaires':'Comments','Écrire un commentaire…':'Write a comment…'};
+'Moments':'Moments','Favoris':'Favorites','Intention':'Intent','Amitié':'Friendship','Relation sérieuse':'Serious relationship','Rencontre amoureuse':'Romantic dating','Discussion':'Chatting','Réseau social':'Social networking','💛 Ajouter aux favoris':'💛 Add to favorites','💛 Retirer des favoris':'💛 Remove from favorites','🚫 Bloquer':'🚫 Block','Mode sombre':'Dark mode','Mode invisible':'Invisible mode','Débloquer':'Unblock','Quoi de neuf ?':'What’s new?','Photo':'Photo','Publier':'Post','Ma story':'My story','Moi':'Me','Commenter':'Comment','Commentaires':'Comments','Écrire un commentaire…':'Write a comment…','Notifications':'Notifications','Voir les notifications':'View notifications','Intérêts':'Interests','Nous contacter':'Contact us','Sujet':'Subject','Signaler un problème':'Report a problem','Signaler un profil':'Report a profile','Faire une suggestion':'Make a suggestion','Message':'Message','Nom du profil concerné':'Name of the profile','Faire vérifier mon profil':'Get my profile verified','Profil vérifié':'Verified profile','Connexion par téléphone':'Phone login','Recevoir le code SMS':'Get SMS code','Code à 6 chiffres':'6-digit code','Valider':'Confirm','Numéro invalide (format +243…)':'Invalid number (format +243…)','Continuer avec le téléphone':'Continue with phone','En ligne':'Online','Enregistrer la photo':'Save photo'};
 const t=s=>lang==='en'&&EN[s]?EN[s]:s,L=(f,e)=>lang==='en'?e:f;
-const ERR={'auth/invalid-credential':['E-mail ou mot de passe incorrect.','Wrong email or password.'],'auth/invalid-email':['Adresse e-mail invalide.','Invalid email address.'],'auth/email-already-in-use':['Cet e-mail a déjà un compte. Connecte-toi.','This email already has an account. Log in.'],'auth/weak-password':['Mot de passe trop court (6 caractères min.).','Password too short (6+ characters).'],'auth/too-many-requests':['Trop d’essais. Réessaie plus tard.','Too many attempts. Try again later.'],'auth/network-request-failed':['Pas de connexion internet.','No internet connection.'],'auth/popup-closed-by-user':['','']};
+const ERR={'auth/invalid-credential':['E-mail ou mot de passe incorrect.','Wrong email or password.'],'auth/invalid-email':['Adresse e-mail invalide.','Invalid email address.'],'auth/email-already-in-use':['Cet e-mail a déjà un compte. Connecte-toi.','This email already has an account. Log in.'],'auth/weak-password':['Mot de passe trop court (6 caractères min.).','Password too short (6+ characters).'],'auth/too-many-requests':['Trop d’essais. Réessaie plus tard.','Too many attempts. Try again later.'],'auth/network-request-failed':['Pas de connexion internet.','No internet connection.'],'auth/popup-closed-by-user':['',''],'auth/invalid-phone-number':['Numéro de téléphone invalide.','Invalid phone number.'],'auth/invalid-verification-code':['Code incorrect.','Wrong code.'],'auth/code-expired':['Code expiré.','Code expired.'],'auth/quota-exceeded':['Limite de SMS atteinte pour aujourd’hui.','Daily SMS limit reached.'],'auth/captcha-check-failed':['Vérification anti-robot échouée. Réessaie.','Anti-bot check failed. Try again.'],'auth/operation-not-allowed':['Méthode non activée.','Method not enabled.']};
 const fr=e=>ERR[e.code]?ERR[e.code][lang==='en'?1:0]:e.message;
 
 const LOGO=(s=30,inv)=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><defs><linearGradient id="lgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb7185"/><stop offset="1" stop-color="#be123c"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="${inv?'#fff':'url(#lgg)'}"/><path d="M50 78C26 60 20 46 20 36c0-9 7-15 15-15 6 0 12 3 15 9 3-6 9-9 15-9 8 0 15 6 15 15 0 10-6 24-30 42z" fill="${inv?'#e11d48':'#fff'}"/></svg>`;
@@ -84,19 +91,19 @@ const bst=u=>(u.boostUntil||0)>Date.now();
 const stop=()=>{if(unsub){unsub();unsub=null}};
 const spin=()=>app.innerHTML='<div class="spin"></div>';
 function buildNav(){$('lg').innerHTML=LOGO(30,1)+' Bolingo';$('hf').textContent='🎛 '+t('Filtres');
- nav.innerHTML=[['swipe','🔥','Découvrir'],['moments','📰','Moments'],['matches','💬','Matchs'],['profile','👤','Profil'],['settings','⚙️','Réglages']].map(x=>`<button data-v="${x[0]}"><b>${x[1]}</b>${t(x[2])}</button>`).join('')}
+ nav.innerHTML=[['swipe','🔥','Découvrir'],['moments','📰','Moments'],['matches','💬','Matchs'],['profile','👤','Profil'],['settings','⚙️','Réglages']].map(x=>`<button data-v="${x[0]}"><b>${x[1]}</b>${t(x[2])}</button>`).join('');badges()}
 nav.onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-function go(v,a){stop();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,moments:viewMoments,matches:viewMatches,profile:()=>viewProfile(),settings:viewSettings,chat:()=>viewChat(a)})[v]()}
+function go(v,a){stop();chatOpen=null;nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,moments:viewMoments,notifs:viewNotifs,admin:viewAdmin,matches:viewMatches,profile:()=>viewProfile(),settings:viewSettings,chat:()=>viewChat(a)})[v]()}
 
 /* ---- Connexion ---- */
 function viewAuth(mode='in'){
- nav.style.display='none';$('hf').style.display='none';buildNav();
+ nav.style.display='none';$('hf').style.display='none';$('hb').style.display='none';buildNav();
  app.innerHTML=`<div class="box"><div class="hero">${LOGO(72)}<h1>Bolingo</h1><div class="muted">${t('Rencontres')}</div></div>
  <div class="tabs"><button id="t1" class="${mode==='in'?'on':''}">${t('Connexion')}</button><button id="t2" class="${mode==='up'?'on':''}">${t('Inscription')}</button></div>
  <form id="f"><input id="em" type="email" placeholder="${t('E-mail')}" autocomplete="email" required>
  <input id="pw" type="password" placeholder="${t('Mot de passe')}" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
  <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?t('Se connecter'):t('Créer mon compte')}</button></form>
- <button class="btn s" id="gg">${t('Continuer avec Google')}</button>
+ <button class="btn s" id="gg">${t('Continuer avec Google')}</button><button class="btn s" id="pbtn">📱 ${t('Continuer avec le téléphone')}</button>
  ${mode==='in'?`<p class="muted"><a href="#" id="fg">${t('Mot de passe oublié ?')}</a></p>`:''}
  <p class="muted"><a href="#" id="lg2">${lang==='fr'?'English':'Français'}</a></p></div>`;
  $('t1').onclick=()=>viewAuth('in');$('t2').onclick=()=>viewAuth('up');
@@ -104,7 +111,7 @@ function viewAuth(mode='in'){
  const er=m=>$('err').textContent=m;
  $('f').onsubmit=async e=>{e.preventDefault();$('go').disabled=true;er('');
   try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}catch(x){er(fr(x));$('go').disabled=false}};
- $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};
+ $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};$('pbtn').onclick=phoneAuth;
  if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er(L('Entre ton e-mail puis touche « Mot de passe oublié ».','Enter your email then tap “Forgot password?”.'));
   try{await auth.sendPasswordResetEmail(a);er('');alert(L('E-mail de réinitialisation envoyé.','Reset email sent.'))}catch(x){er(fr(x))}}}
 function setLang(l,cb){lang=l;LS.s('bl',l);document.documentElement.lang=l;buildNav();cb()}
@@ -151,7 +158,8 @@ function pass(u){
  if(flt.religion&&u.religion!==flt.religion)return false;if(flt.interest&&!(u.interests||[]).some(i=>Lw(i).includes(Lw(flt.interest))))return false;return true}
 const hay=u=>[u.name,u.lastName,u.city,u.job,u.school,u.church,u.religion,(u.interests||[]).join(' ')].join(' ').toLowerCase();
 async function doSwipe(u,type){await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS()});
- if(type==='like'){const b=await db.doc('swipes/'+u.id+'_'+uid).get();if(b.exists&&b.data().type==='like'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});return true}}return false}
+ if(type!=='pass'){notify(u.id,type);const b=await db.doc('swipes/'+u.id+'_'+uid).get();
+  if(b.exists&&b.data().type!=='pass'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});notify(u.id,'match');return true}}return false}
 async function viewSwipe(){
  app.innerHTML=`<div class="bar"><input id="q" type="search" placeholder="🔍 ${t('Rechercher un profil…')}"><button class="ibt" id="inv" title="${t('Inviter')}">⭐</button></div><div id="res"></div><div id="dk"><div class="spin"></div></div>`;
  $('inv').onclick=share;
@@ -165,34 +173,35 @@ async function viewSwipe(){
  catch(e){$('dk').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
 function cardHTML(u,back){
  return `<div class="card ${back?'back':''}" style="${bg(u)}">${back?'':`<div class="dots">${(u.photos||[]).map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>${bst(u)?'<div class="bdg">⭐ Boost</div>':''}<div class="stamp st-l">LIKE</div><div class="stamp st-n">NOPE</div><button class="ibtn">ℹ</button>`}
- <div class="info"><h2>${esc(u.name)}${age(u.birth)?', '+age(u.birth):''}</h2><p>${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</p>${(u.interests||[]).slice(0,4).map(i=>`<span class="chip">${esc(i)}</span>`).join('')}</div></div>`}
+ <div class="info"><h2>${esc(u.name)}${age(u.birth)?', '+age(u.birth):''}${vf(u)}${online(u)?'<span class="dot"></span>':''}</h2><p>${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}${!online(u)&&seen(u)?' · '+seen(u):''}</p>${(u.interests||[]).slice(0,4).map(i=>`<span class="chip">${esc(i)}</span>`).join('')}</div></div>`}
 function showDeck(deck){
  const dk=$('dk');if(!dk)return;
  if(!deck.length){dk.innerHTML=`<div class="box muted"><h2>${t('Plus personne pour l’instant')}</h2><p>${t('Élargis tes filtres ou reviens plus tard.')}</p><button class="btn" id="r">${t('Actualiser')}</button></div>`;$('r').onclick=viewSwipe;return}
- const u=deck[0];dk.innerHTML=`<div class="stack">${deck[1]?cardHTML(deck[1],1):''}${cardHTML(u)}</div><div class="acts"><button id="no">✕</button><button id="yes">♥</button></div>`;
+ const u=deck[0];dk.innerHTML=`<div class="stack">${deck[1]?cardHTML(deck[1],1):''}${cardHTML(u)}</div><div class="acts"><button id="no">✕</button><button id="sm" class="sm">💥</button><button id="yes">♥</button></div>`;
  const c=dk.querySelectorAll('.card'),top=c[c.length-1],sl=top.querySelector('.st-l'),sn=top.querySelector('.st-n'),dots=top.querySelectorAll('.dots i');let pi=0,busy=false;
  const next=()=>{deck.shift();showDeck(deck)};
- const act=async type=>{if(busy)return;busy=true;top.style.transition='transform .35s';top.style.transform=`translate(${type==='like'?600:-600}px,0) rotate(${type==='like'?30:-30}deg)`;
+ const act=async type=>{if(busy)return;busy=true;top.style.transition='transform .35s';top.style.transform=type==='smash'?'translate(0,-800px) scale(1.1)':`translate(${type==='like'?600:-600}px,0) rotate(${type==='like'?30:-30}deg)`;if(type!=='pass')burst(type==='smash'?'💥':'❤️',type==='smash'?10:6);
   try{if(await doSwipe(u,type))setTimeout(()=>matchPop(u),250)}catch(e){alert(e.message)}setTimeout(next,300)};
- let sx=0,sy=0,dx=0,drag=false,moved=false;
+ let sx=0,sy=0,dx=0,dy=0,drag=false,moved=false;
  top.onpointerdown=e=>{if(e.target.closest('.ibtn'))return;drag=true;moved=false;sx=e.clientX;sy=e.clientY;dx=0;top.style.transition='none';top.setPointerCapture(e.pointerId)};
- top.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;const dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>8)moved=true;top.style.transform=`translate(${dx}px,${dy*.4}px) rotate(${dx/18}deg)`;sl.style.opacity=Math.max(0,dx/100);sn.style.opacity=Math.max(0,-dx/100)};
- top.onpointerup=e=>{if(!drag)return;drag=false;if(dx>110)return act('like');if(dx<-110)return act('pass');
+ top.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>8)moved=true;top.style.transform=`translate(${dx}px,${dy*.4}px) rotate(${dx/18}deg)`;sl.style.opacity=Math.max(0,dx/100);sn.style.opacity=Math.max(0,-dx/100)};
+ top.onpointerup=e=>{if(!drag)return;drag=false;if(dx>110)return act('like');if(dx<-110)return act('pass');if(dy<-130&&Math.abs(dx)<90)return act('smash');
   top.style.transition='transform .25s';top.style.transform='';sl.style.opacity=sn.style.opacity=0;
+  if(!moved){const el=document.elementFromPoint(e.clientX,e.clientY);if(el&&el.closest('.info'))return detail(u,{like:1})}
   if(!moved&&u.photos.length>1){const r=top.getBoundingClientRect();pi=(e.clientX-r.left>r.width/2)?(pi+1)%u.photos.length:(pi-1+u.photos.length)%u.photos.length;top.style.backgroundImage=`url(${u.photos[pi]})`;dots.forEach((d,i)=>d.classList.toggle('on',i===pi))}};
- top.querySelector('.ibtn').onclick=()=>detail(u);$('no').onclick=()=>act('pass');$('yes').onclick=()=>act('like')}
+ top.querySelector('.ibtn').onclick=()=>detail(u);$('no').onclick=()=>act('pass');$('yes').onclick=()=>act('like');$('sm').onclick=()=>act('smash')}
 function detail(u,o){
  const row=(l,v)=>v?`<p style="margin:6px 0"><b>${t(l)} :</b> ${esc(t(v))}</p>`:'',a=age(u.birth);
  const ov=document.createElement('div');ov.className='ov';
- ov.innerHTML=`<div class="sheet">${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}<h2 style="margin:6px 0">${esc(u.name)} ${esc(u.lastName)}${a?', '+a+L(' ans',' yrs'):''}</h2>
- ${row('Genre',u.gender)}${row('Commune',u.city)}${row('Taille',u.height?u.height+' cm':'')}${row('Profession',u.job)}${row('Université / École',u.school)}${row('Église',u.church)}${row('Religion',u.religion)}${row('Recherche',u.seeking)}${row('Intention',u.intent)}
+ ov.innerHTML=`<div class="sheet">${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}<h2 style="margin:6px 0">${esc(u.name)} ${esc(u.lastName)}${a?', '+a+L(' ans',' yrs'):''}${vf(u)}</h2>
+ ${online(u)?`<p style="color:#16a34a;margin:2px 0">● ${t('En ligne')}</p>`:(seen(u)?`<p class="muted" style="text-align:left;margin:2px 0">${seen(u)}</p>`:'')}${row('Genre',u.gender)}${row('Commune',u.city)}${row('Taille',u.height?u.height+' cm':'')}${row('Profession',u.job)}${row('Université / École',u.school)}${row('Église',u.church)}${row('Religion',u.religion)}${row('Recherche',u.seeking)}${row('Intention',u.intent)}
  ${(u.interests||[]).map(i=>`<span class="chip d">${esc(i)}</span>`).join('')}<p>${esc(u.bio)}</p>
  ${o&&o.like?`<button class="btn" id="lk">${t('♥ Liker')}</button>`:''}<button class="btn s" id="cl">${t('Fermer')}</button>${u.id!==uid?`<button class="btn s" id="fv">${favs.has(u.id)?t('💛 Retirer des favoris'):t('💛 Ajouter aux favoris')}</button><button class="btn s" id="bk2" style="border-color:#9ca3af;color:var(--mu)">${t('🚫 Bloquer')}</button><button class="btn s" id="rp" style="border-color:#9ca3af;color:#6b7280">${t('Signaler ce profil')}</button>`:''}</div>`;
- document.body.appendChild(ov);ov.onclick=e=>{if(e.target===ov)ov.remove()};$('cl').onclick=()=>ov.remove();
+ document.body.appendChild(ov);ov.querySelectorAll('img.big').forEach(i=>i.onclick=()=>openImg(i.src));ov.onclick=e=>{if(e.target===ov)ov.remove()};$('cl').onclick=()=>ov.remove();
  if($('lk'))$('lk').onclick=async()=>{ov.remove();try{if(await doSwipe(u,'like'))matchPop(u);else alert(L('Like envoyé ♥','Like sent ♥'))}catch(e){alert(e.message)}};
  if($('fv'))$('fv').onclick=async()=>{await toggleFav(u);ov.remove()};
  if($('bk2'))$('bk2').onclick=async()=>{if(confirm(L('Bloquer ce membre ?','Block this member?'))){await blockUser(u);ov.remove();go('swipe')}};
- if($('rp'))$('rp').onclick=async()=>{try{await db.collection('reports').add({from:uid,about:u.id,at:TS()});alert(L('Merci, le profil a été signalé.','Thanks, the profile was reported.'))}catch(e){alert(e.message)}ov.remove()}}
+ if($('rp'))$('rp').onclick=async()=>{const tx=prompt(L('Explique le problème (facultatif)','Explain the problem (optional)'));if(tx===null)return;try{await db.collection('tickets').add({from:uid,type:'profil',about:u.id,text:tx||'-',status:'new',at:TS()});alert(L('Merci, le profil a été signalé.','Thanks, the profile was reported.'))}catch(e){alert(e.message)}ov.remove()}}
 function matchPop(u){const o=document.createElement('div');o.className='ov';o.style.alignItems='center';
  o.innerHTML=`<div class="box" style="text-align:center;margin:20px"><h1 style="color:#e11d48;margin:0">${t('C’est un match ! 💞')}</h1><p>${L('Toi et '+esc(u.name)+' vous plaisez mutuellement.','You and '+esc(u.name)+' like each other.')}</p><div class="av" style="width:110px;height:110px;margin:10px auto;${bg(u)}"></div><button class="btn" id="m1">${t('Envoyer un message')}</button><button class="btn s" id="m2">${t('Continuer')}</button></div>`;
  document.body.appendChild(o);$('m2').onclick=()=>o.remove();$('m1').onclick=()=>{o.remove();go('chat',{id:[uid,u.id].sort().join('_'),u})}}
@@ -227,9 +236,10 @@ async function viewSettings(){
  ${on?`<p class="muted">${L('Boost actif jusqu’au ','Boost active until ')}${new Date(me.boostUntil).toLocaleString(lang)}</p>`:''}</div>
  <div class="box" style="margin-top:12px"><h3 style="margin-top:0">🌐 ${t('Langue')}</h3><div class="g"><button class="btn ${lang==='fr'?'':'s'}" id="lf" style="margin:0">Français</button><button class="btn ${lang==='en'?'':'s'}" id="le" style="margin:0">English</button></div></div>
  <div class="box" style="margin-top:12px"><div class="sw"><span>🌙 ${t('Mode sombre')}</span><input type="checkbox" id="dm" style="width:auto;margin:0" ${document.body.classList.contains('dark')?'checked':''}></div><div class="sw"><span>👻 ${t('Mode invisible')}</span><input type="checkbox" id="iv" style="width:auto;margin:0" ${me.hidden?'checked':''}></div><p class="muted" style="font-size:12px;margin:0">${L('Invisible : ton profil n’apparaît plus dans Découvrir ni dans la recherche.','Invisible: your profile no longer appears in Discover or search.')}</p><div id="bl"></div></div>
+ <div class="box" style="margin-top:12px"><button class="btn s" id="ct" style="margin-top:0">📮 ${t('Nous contacter')}</button><button class="btn s" id="vf2">✅ ${me.verified?t('Profil vérifié'):t('Faire vérifier mon profil')}</button>${isAdm?'<button class="btn" id="ad2">🛠 Espace administrateur</button>':''}</div>
  <div class="box" style="margin-top:12px">${dip?`<button class="btn" id="ins" style="margin-top:0">📲 ${t('Installer l’application')}</button>`:`<p class="muted" style="margin:0">📲 ${L('Installer l’application : menu ⋮ de Chrome → « Ajouter à l’écran d’accueil » (ou « Installer l’application »).','Install the app: Chrome menu ⋮ → “Add to Home screen” (or “Install app”).')}</p>`}
  <p class="muted" style="font-size:13px">${esc(auth.currentUser&&auth.currentUser.email||'')}</p><button class="btn s" id="out">${t('Se déconnecter')}</button></div>`;
- $('sh').onclick=share;$('out').onclick=()=>auth.signOut();
+ $('sh').onclick=share;$('out').onclick=()=>auth.signOut();$('ct').onclick=()=>contactSheet();$('vf2').onclick=verifySheet;if($('ad2'))$('ad2').onclick=()=>go('admin');
  $('dm').onchange=e=>{document.body.classList.toggle('dark',e.target.checked);LS.s('dm',e.target.checked?'1':'')};
  $('iv').onchange=async e=>{try{await db.doc('users/'+uid).set({hidden:e.target.checked},{merge:true});me.hidden=e.target.checked}catch(x){alert(x.message)}};
  loadUsers().then(()=>{$('bl').innerHTML=[...blocked].map(id=>`<div class="sw"><span>🚫 ${esc(uOf(id).name)}</span><button class="btn s" data-u="${id}" style="width:auto;margin:0;padding:6px 10px">${t('Débloquer')}</button></div>`).join('');$('bl').onclick=async e=>{const id=e.target.dataset&&e.target.dataset.u;if(id){await unblock(id);viewSettings()}}}).catch(()=>{});
@@ -240,8 +250,8 @@ async function viewSettings(){
 
 /* ---- Matchs & chat ---- */
 function viewMatches(){
- app.innerHTML=`<div class="tabs"><button id="tm" class="${mtab==='m'?'on':''}">${t('Matchs')}</button><button id="tf" class="${mtab==='f'?'on':''}">${t('Favoris')}</button></div><div id="mc"></div>`;
- $('tm').onclick=()=>{mtab='m';viewMatches()};$('tf').onclick=()=>{mtab='f';viewMatches()};mtab==='m'?matchList():favList()}
+ app.innerHTML=`<div class="tabs"><button id="tm" class="${mtab==='m'?'on':''}">${t('Matchs')}</button><button id="ti" class="${mtab==='i'?'on':''}">${t('Intérêts')}</button><button id="tf" class="${mtab==='f'?'on':''}">${t('Favoris')}</button></div><div id="mc"></div>`;
+ $('tm').onclick=()=>{mtab='m';viewMatches()};$('ti').onclick=()=>{mtab='i';viewMatches()};$('tf').onclick=()=>{mtab='f';viewMatches()};mtab==='m'?matchList():mtab==='i'?intList():favList()}
 async function matchList(){
  $('mc').innerHTML='<div class="spin"></div>';
  try{const s=await db.collection('matches').where('users','array-contains',uid).get();
@@ -249,14 +259,19 @@ async function matchList(){
   $('mc').innerHTML='<div id="l"></div>';
   for(const m of s.docs){const oid=m.data().users.find(x=>x!==uid);if(blocked.has(oid))continue;const d=await db.doc('users/'+oid).get(),u=d.exists?{id:oid,...d.data()}:{id:oid,name:'?'};
    const it=document.createElement('div');it.className='item';it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div><b>${esc(u.name)}</b><div class="muted" style="text-align:left;font-size:13px">${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</div></div>`;
+   {const md=m.data(),n=(md.unread||{})[uid]||0;it.lastElementChild.innerHTML=`<b>${esc(u.name)}${vf(u)}${online(u)?'<span class="dot"></span>':''}</b><div class="muted" style="text-align:left;font-size:13px">${esc(md.lastText||[u.job,u.city].filter(Boolean).join(' · '))}</div>`;if(n){const bd=document.createElement('span');bd.className='bd';bd.style.marginLeft='auto';bd.textContent=n;it.appendChild(bd)}}
    it.onclick=()=>go('chat',{id:m.id,u});$('l').appendChild(it)}}catch(e){$('mc').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
 function viewChat(m){
- app.innerHTML=`<div class="item" style="margin-top:0"><button class="btn s" id="bk" style="width:auto;margin:0;padding:8px 12px">←</button><div class="av" style="width:42px;height:42px;${bg(m.u)}"></div><b style="flex:1">${esc(m.u.name)}</b><button class="btn s" id="pf" style="width:auto;margin:0;padding:8px 12px">${t('Profil')}</button></div>
+ app.innerHTML=`<div class="item" style="margin-top:0"><button class="btn s" id="bk" style="width:auto;margin:0;padding:8px 12px">←</button><div class="av" style="width:42px;height:42px;${bg(m.u)}"></div><div style="flex:1"><b>${esc(m.u.name)}${vf(m.u)}</b><div id="st" class="muted" style="text-align:left;font-size:12px"></div></div><button class="btn s" id="pf" style="width:auto;margin:0;padding:8px 12px">${t('Profil')}</button></div>
  <div class="msgs" id="ms"></div><div class="send"><input id="tx" maxlength="1000" placeholder="${t('Message…')}"><button class="btn s" id="ph2" style="width:48px;margin:0">📷</button><input id="f2" type="file" accept="image/*" style="display:none"><button class="btn" id="sd">${t('Envoyer')}</button></div>`;
- $('ph2').onclick=()=>$('f2').click();$('f2').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const img=await resize(f);await db.collection('matches/'+m.id+'/messages').add({from:uid,text:'📷',img,at:TS()})}catch(x){alert(x.message)}};
+ $('ph2').onclick=()=>$('f2').click();$('f2').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const img=await resize(f);await db.collection('matches/'+m.id+'/messages').add({from:uid,text:'📷',img,at:TS(),read:false});bump(m.id,'📷')}catch(x){alert(x.message)}};
  $('bk').onclick=()=>go('matches');$('pf').onclick=()=>detail(m.u);
- const box=$('ms');unsub=db.collection('matches/'+m.id+'/messages').orderBy('at').onSnapshot(s=>{box.innerHTML='';s.forEach(d=>{const x=d.data(),b=document.createElement('div');b.className='m'+(x.from===uid?' me':'');if(x.img){const i=document.createElement('img');i.src=x.img;i.style.cssText='max-width:100%;border-radius:10px;display:block';b.appendChild(i)}else b.textContent=x.text;box.appendChild(b)});window.scrollTo(0,document.body.scrollHeight)},e=>box.textContent=e.message);
- const send=async()=>{const tx=$('tx').value.trim();if(!tx)return;$('tx').value='';try{await db.collection('matches/'+m.id+'/messages').add({from:uid,text:tx,at:TS()})}catch(e){alert(e.message)}};
+ chatOpen=m.id;db.doc('matches/'+m.id).update({['unread.'+uid]:0}).catch(()=>{});
+ db.doc('users/'+m.u.id).get().then(d=>{if(d.exists&&$('st')){const x=d.data();$('st').innerHTML=online(x)?'<span style="color:#16a34a">● '+t('En ligne')+'</span>':seen(x)}}).catch(()=>{});
+ const box=$('ms');unsub=db.collection('matches/'+m.id+'/messages').orderBy('at').onSnapshot(s=>{box.innerHTML='';const bt=db.batch();let nb=0;s.forEach(d=>{if(d.data().from!==uid&&!d.data().read&&!d.metadata.hasPendingWrites){bt.update(d.ref,{read:true});nb++}const x=d.data(),b=document.createElement('div');b.className='m'+(x.from===uid?' me':'');if(x.img){const i=document.createElement('img');i.src=x.img;i.style.cssText='max-width:100%;border-radius:10px;display:block';i.onclick=()=>openImg(x.img);b.appendChild(i)}else{const sp=document.createElement('span');sp.textContent=x.text;b.appendChild(sp);if(x.from!==uid){const tr=document.createElement('a');tr.textContent=' 🌐';tr.style.cssText='cursor:pointer;font-size:13px';tr.onclick=async()=>{tr.textContent='…';try{sp.textContent=await translate(x.text)}catch(e){alert(L('Traduction indisponible.','Translation unavailable.'))}tr.remove()};b.appendChild(tr)}}
+  if(x.from===uid){const k=document.createElement('small');k.style.cssText='display:block;text-align:right;opacity:.75';k.textContent=x.read?'✓✓':'✓';b.appendChild(k)}
+  box.appendChild(b)});if(nb)bt.commit().catch(()=>{});window.scrollTo(0,document.body.scrollHeight)},e=>box.textContent=e.message);
+ const send=async()=>{const tx=$('tx').value.trim();if(!tx)return;$('tx').value='';try{await db.collection('matches/'+m.id+'/messages').add({from:uid,text:tx,at:TS(),read:false});bump(m.id,tx)}catch(e){alert(e.message)}};
  $('sd').onclick=send;$('tx').onkeydown=e=>{if(e.key==='Enter')send()}}
 
 /* ---- Blocage & favoris ---- */
@@ -275,8 +290,8 @@ async function favList(){const c=$('mc');c.innerHTML='<div class="spin"></div>';
 const ago=ts=>{if(!ts||!ts.toDate)return L('à l’instant','just now');const s=(Date.now()-ts.toDate())/1000;if(s<3600)return Math.max(1,Math.round(s/60))+' min';if(s<86400)return Math.round(s/3600)+' h';return Math.round(s/86400)+L(' j',' d')};
 async function cleanStories(){const s=await db.collection('stories').where('from','==',uid).get();s.forEach(d=>{if((d.data().expiresAt||0)<Date.now())d.ref.delete()})}
 async function viewMoments(){
- app.innerHTML=`<div class="sto" id="so"></div><div class="box"><textarea id="pt" rows="2" maxlength="1000" placeholder="${t('Quoi de neuf ?')}" style="margin:0 0 8px"></textarea><div id="pp"></div><input id="pf" type="file" accept="image/*" style="display:none"><div class="g"><button class="btn s" id="pb" style="margin:0">📷 ${t('Photo')}</button><button class="btn" id="pu" style="margin:0">${t('Publier')}</button></div></div><div id="fd"><div class="spin"></div></div>`;
- let img=null;$('pb').onclick=()=>$('pf').click();
+ app.innerHTML=`<div class="sto" id="so"></div><button class="btn s" id="bn2" style="margin:0 0 10px">🔔 ${t('Voir les notifications')}</button><div class="box"><textarea id="pt" rows="2" maxlength="1000" placeholder="${t('Quoi de neuf ?')}" style="margin:0 0 8px"></textarea><div id="pp"></div><input id="pf" type="file" accept="image/*" style="display:none"><div class="g"><button class="btn s" id="pb" style="margin:0">📷 ${t('Photo')}</button><button class="btn" id="pu" style="margin:0">${t('Publier')}</button></div></div><div id="fd"><div class="spin"></div></div>`;
+ let img=null;$('bn2').onclick=()=>go('notifs');$('pb').onclick=()=>$('pf').click();
  $('pf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{img=await resize(f);$('pp').innerHTML=`<img src="${img}" style="width:100%;border-radius:12px;margin-bottom:8px">`}catch(x){alert(t('Photo illisible.'))}};
  $('pu').onclick=async()=>{const text=$('pt').value.trim();if(!text&&!img)return;$('pu').disabled=true;
   try{await db.collection('posts').add({from:uid,text,img:img||'',at:TS(),likes:[]});viewMoments()}catch(e){alert(e.message);$('pu').disabled=false}};
@@ -302,28 +317,131 @@ async function loadFeed(){const fd=$('fd');
 function postEl(p){
  const u=uOf(p.from),el=document.createElement('div');el.className='post';
  const draw=()=>{const lk=(p.likes||[]).includes(uid);
-  el.innerHTML=`<div class="h"><div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div style="flex:1"><b>${esc(u.name)} ${esc(u.lastName)}</b><div class="muted" style="text-align:left;font-size:12px">${ago(p.at)}</div></div><button class="ibt" id="mo" style="width:36px;height:36px;font-size:18px;box-shadow:none;background:none">⋯</button></div>${p.text?`<p style="white-space:pre-wrap;margin:8px 0 0">${esc(p.text)}</p>`:''}${p.img?`<img class="pi" src="${p.img}">`:''}<div class="a"><button id="lk" class="${lk?'on':''}">${lk?'❤️':'🤍'} ${(p.likes||[]).length}</button><button id="cm">💬 ${t('Commenter')}</button></div>`;
+  el.innerHTML=`<div class="h"><div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div style="flex:1"><b>${esc(u.name)} ${esc(u.lastName)}${vf(u)}</b><div class="muted" style="text-align:left;font-size:12px">${ago(p.at)}</div></div><button class="ibt" id="mo" style="width:36px;height:36px;font-size:18px;box-shadow:none;background:none">⋯</button></div>${p.text?`<p style="white-space:pre-wrap;margin:8px 0 0">${esc(p.text)}</p>`:''}${p.img?`<img class="pi" src="${p.img}">`:''}<div class="a"><button id="lk" class="${lk?'on':''}">${lk?'❤️':'🤍'} ${(p.likes||[]).length}</button><button id="cm">💬 ${t('Commenter')}</button></div>`;
   el.querySelector('.av').onclick=()=>{if(u.name!=='?')detail(u,{like:p.from!==uid})};
   el.querySelector('#lk').onclick=async()=>{const R=db.doc('posts/'+p.id);p.likes=p.likes||[];
-   try{if(lk){await R.update({likes:firebase.firestore.FieldValue.arrayRemove(uid)});p.likes=p.likes.filter(x=>x!==uid)}else{await R.update({likes:firebase.firestore.FieldValue.arrayUnion(uid)});p.likes.push(uid)}draw()}catch(e){alert(e.message)}};
-  el.querySelector('#cm').onclick=()=>comments(p);
+   try{if(lk){await R.update({likes:firebase.firestore.FieldValue.arrayRemove(uid)});p.likes=p.likes.filter(x=>x!==uid)}else{await R.update({likes:firebase.firestore.FieldValue.arrayUnion(uid)});p.likes.push(uid);burst('❤️',5);if(p.from!==uid)notify(p.from,'plike',{post:p.id})}draw()}catch(e){alert(e.message)}};
+  el.querySelector('#cm').onclick=()=>comments(p);const pi=el.querySelector('.pi');if(pi)pi.onclick=()=>openImg(p.img);
   el.querySelector('#mo').onclick=async()=>{
-   if(p.from===uid){if(confirm(L('Supprimer cette publication ?','Delete this post?'))){try{await db.doc('posts/'+p.id).delete();el.remove()}catch(e){alert(e.message)}}}
-   else if(confirm(L('Signaler cette publication ?','Report this post?'))){try{await db.collection('reports').add({from:uid,about:p.from,post:p.id,at:TS()});alert(L('Merci, signalement envoyé.','Thanks, report sent.'))}catch(e){alert(e.message)}}}};
+   if(p.from===uid||isAdm){if(confirm(L('Supprimer cette publication ?','Delete this post?'))){try{await db.doc('posts/'+p.id).delete();el.remove()}catch(e){alert(e.message)}}}
+   else{const tx=prompt(L('Pourquoi signalez-vous cette publication ?','Why are you reporting this post?'));if(tx===null)return;try{await db.collection('tickets').add({from:uid,type:'post',about:p.from,post:p.id,text:tx||'-',status:'new',at:TS()});alert(L('Merci, signalement envoyé.','Thanks, report sent.'))}catch(e){alert(e.message)}}}};
  draw();return el}
 async function comments(p){const o=document.createElement('div');o.className='ov';
- o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">💬 ${t('Commentaires')}</h3><div id="cl2"><div class="spin"></div></div><div style="display:flex;gap:8px"><input id="ci" maxlength="500" placeholder="${t('Écrire un commentaire…')}" style="margin:0"><button class="btn" id="cs" style="width:90px;margin:0">${t('Envoyer')}</button></div></div>`;
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">💬 ${t('Commentaires')}</h3><div id="cl2"><div class="spin"></div></div><div id="rt" class="muted" style="text-align:left;font-size:12px"></div><div style="display:flex;gap:8px"><input id="ci" maxlength="500" placeholder="${t('Écrire un commentaire…')}" style="margin:0"><button class="btn" id="cs" style="width:90px;margin:0">${t('Envoyer')}</button></div></div>`;
  document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};
- const C=db.collection('posts/'+p.id+'/comments'),add=x=>{const u=uOf(x.from),d=document.createElement('p');d.style.margin='6px 0';d.innerHTML=`<b>${esc(u.name)}</b> ${esc(x.text)}`;$('cl2').appendChild(d)};
- try{const s=await C.orderBy('at').get();$('cl2').innerHTML='';if(s.empty)$('cl2').innerHTML=`<p class="muted">${L('Aucun commentaire.','No comments.')}</p>`;s.forEach(d=>{if(!blocked.has(d.data().from))add(d.data())})}catch(e){$('cl2').textContent=e.message}
- $('cs').onclick=async()=>{const tx=$('ci').value.trim();if(!tx)return;$('ci').value='';try{await C.add({from:uid,text:tx,at:TS()});if($('cl2').querySelector('.muted'))$('cl2').innerHTML='';add({from:uid,text:tx})}catch(e){alert(e.message)}}}
+ const C=db.collection('posts/'+p.id+'/comments');let all=[],rep=null;
+ const draw=()=>{const box=$('cl2');box.innerHTML='';const top=all.filter(c=>!c.parent);
+  if(!top.length)box.innerHTML=`<p class="muted">${L('Aucun commentaire.','No comments.')}</p>`;
+  const row=(c,ind)=>{const u=uOf(c.from),d=document.createElement('div'),lk=(c.likes||[]).includes(uid);d.style.cssText='margin:8px 0 0 '+(ind?28:0)+'px';
+   d.innerHTML=`<b>${esc(u.name)}</b> ${esc(c.text)}<div class="muted" style="text-align:left;font-size:12px">${ago(c.at)} · <a data-a="l" style="cursor:pointer;${lk?'color:#e11d48':''}">${lk?'❤️':'🤍'} ${(c.likes||[]).length}</a>${ind?'':` · <a data-a="r" style="cursor:pointer">${L('Répondre','Reply')}</a>`}${c.from===uid||isAdm?` · <a data-a="d" style="cursor:pointer">🗑</a>`:''}</div>`;
+   d.onclick=async e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a)return;
+    if(a==='r'){rep=c;$('rt').textContent=L('Réponse à ','Replying to ')+u.name;$('ci').focus()}
+    if(a==='l'){try{await C.doc(c.id).update({likes:lk?firebase.firestore.FieldValue.arrayRemove(uid):firebase.firestore.FieldValue.arrayUnion(uid)});c.likes=c.likes||[];if(lk)c.likes=c.likes.filter(x=>x!==uid);else{c.likes.push(uid);burst('❤️',4);if(c.from!==uid)notify(c.from,'clike',{post:p.id})}draw()}catch(x){alert(x.message)}}
+    if(a==='d'){try{await C.doc(c.id).delete();all=all.filter(x=>x.id!==c.id&&x.parent!==c.id);draw()}catch(x){alert(x.message)}}};
+   box.appendChild(d);if(!ind)all.filter(x=>x.parent===c.id).forEach(k=>row(k,1))};
+  top.forEach(c=>row(c,0))};
+ try{const s=await C.orderBy('at').get();s.forEach(d=>{const x={id:d.id,...d.data()};if(!blocked.has(x.from))all.push(x)});draw()}catch(e){$('cl2').textContent=e.message}
+ $('cs').onclick=async()=>{const tx=$('ci').value.trim();if(!tx)return;$('ci').value='';
+  const doc={from:uid,text:tx,at:TS(),likes:[]};if(rep)doc.parent=rep.parent||rep.id;
+  try{const r=await C.add(doc);all.push({id:r.id,...doc,at:null});if(rep){if(rep.from!==uid)notify(rep.from,'reply',{post:p.id})}else if(p.from!==uid)notify(p.from,'comment',{post:p.id});rep=null;$('rt').textContent='';draw()}catch(e){alert(e.message)}}}
+
+/* ---- Animations, notifications, présence ---- */
+function burst(e,n=8){for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fl';s.textContent=e;s.style.left=(20+Math.random()*60)+'vw';s.style.top=(45+Math.random()*20)+'vh';s.style.animationDelay=(i*70)+'ms';document.body.appendChild(s);setTimeout(()=>s.remove(),1500)}}
+function toast(txt){const d=document.createElement('div');d.className='toast';d.textContent=txt;d.onclick=()=>{d.remove();go('notifs')};document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}setTimeout(()=>d.remove(),4500)}
+async function notify(to,type,extra){try{await db.collection('notifications').add({to,from:uid,type,at:TS(),read:false,...(extra||{})})}catch(e){}}
+const ntxt=n=>{const u=uOf(n.from).name||'?',M={like:L(`${u} a aimé ton profil ❤️`,`${u} liked your profile ❤️`),smash:L(`${u} t’a envoyé un SMASH 💥`,`${u} sent you a SMASH 💥`),match:L(`C’est un match avec ${u} 💞`,`It’s a match with ${u} 💞`),comment:L(`${u} a commenté ta publication`,`${u} commented on your post`),reply:L(`${u} a répondu à ton commentaire`,`${u} replied to your comment`),clike:L(`${u} a aimé ton commentaire ❤️`,`${u} liked your comment ❤️`),plike:L(`${u} a aimé ta publication ❤️`,`${u} liked your post ❤️`),warn:L('⚠️ Avertissement de l’équipe Bolingo : ','⚠️ Warning from the Bolingo team: ')+(n.text||'')};return M[n.type]||n.text||''};
+function badges(){const un=nots.filter(n=>!n.read).length,um=mats.reduce((a,m)=>a+((m.unread||{})[uid]||0),0);
+ if($('bn'))$('bn').textContent=un||'';const b=nav.querySelector('[data-v="matches"]');if(b){let e=b.querySelector('.bd');if(!e){e=document.createElement('i');e.className='bd';b.appendChild(e)}e.textContent=um||''}}
+function listen(){let f1=true,f2=true;
+ const a=db.collection('notifications').where('to','==',uid).onSnapshot(s=>{nots=s.docs.map(d=>({id:d.id,...d.data()}));
+  if(!f1)s.docChanges().forEach(c=>{if(c.type==='added'){const n=c.doc.data();toast(ntxt(n));if(n.type==='smash'||n.type==='match')burst(n.type==='smash'?'💥':'💞',10)}});f1=false;badges()},()=>{});
+ const b=db.collection('matches').where('users','array-contains',uid).onSnapshot(s=>{mats=s.docs.map(d=>({id:d.id,...d.data()}));
+  if(!f2)s.docChanges().forEach(c=>{if(c.type==='modified'){const m=c.doc.data();if(m.lastFrom&&m.lastFrom!==uid&&((m.unread||{})[uid]||0)>0&&chatOpen!==c.doc.id)toast('💬 '+L('Nouveau message de ','New message from ')+uOf(m.users.find(x=>x!==uid)).name)}});f2=false;badges()},()=>{});
+ return()=>{a();b()}}
+function viewNotifs(){
+ $('hf').style.display='none';nav.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+ const items=[...nots].sort((a,b)=>(b.at?b.at.seconds:9e9)-(a.at?a.at.seconds:9e9)),msgs=mats.filter(m=>((m.unread||{})[uid]||0)>0);
+ app.innerHTML=`<h3 style="margin-top:0">🔔 ${t('Notifications')}</h3><div id="nl"></div>`;const nl=$('nl');
+ msgs.forEach(m=>{const u=uOf(m.users.find(x=>x!==uid)),k=m.unread[uid];nl.appendChild(nrow(u,'💬 '+L(`${k} nouveau(x) message(s) de ${u.name}`,`${k} new message(s) from ${u.name}`),null,()=>go('chat',{id:m.id,u})))});
+ items.forEach(n=>{const u=uOf(n.from);nl.appendChild(nrow(u,ntxt(n),n,()=>{if(['like','smash','match'].includes(n.type)&&u.name!=='?')detail(u,{like:1});else if(['news','warn'].includes(n.type)){}else go('moments')}))});
+ if(!nl.children.length)nl.innerHTML=`<div class="box muted"><p>${L('Aucune notification.','No notifications.')}</p></div>`;
+ const un=items.filter(n=>!n.read);if(un.length){const b=db.batch();un.forEach(n=>b.update(db.collection('notifications').doc(n.id),{read:true}));b.commit().catch(()=>{})}}
+function nrow(u,txt,n,fn){const it=document.createElement('div');it.className='item';it.style.opacity=n&&n.read?0.7:1;it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div style="flex:1">${esc(txt)}<div class="muted" style="text-align:left;font-size:12px">${n?ago(n.at):''}</div></div>`;it.onclick=fn;return it}
+async function intList(){const c=$('mc');c.innerHTML='<div class="spin"></div>';
+ try{await loadUsers();const s=await db.collection('swipes').where('to','==',uid).get(),r=[];
+  s.forEach(d=>{const x=d.data();if(x.type!=='pass'&&!blocked.has(x.from))r.push(x)});r.sort((a,b)=>(b.at?b.at.seconds:0)-(a.at?a.at.seconds:0));
+  c.innerHTML=r.length?'':`<div class="box muted"><p>${L('Personne pour l’instant.','Nobody yet.')}</p></div>`;
+  r.forEach(x=>{const u=uOf(x.from),it=userRow(u,()=>detail(u,{like:1})),b=document.createElement('span');b.textContent=x.type==='smash'?'💥':'❤️';b.style.cssText='margin-left:auto;font-size:22px';it.appendChild(b);c.appendChild(it)})}catch(e){c.innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
+const online=u=>Date.now()-(u.lastSeen||0)<300000;
+const vf=u=>u&&u.verified?'<span class="vf">✓</span>':'';
+const seen=u=>{const d=Date.now()-(u.lastSeen||0);if(!u.lastSeen||d>2592e5||d<3e5)return '';const m=Math.round(d/6e4),h=Math.round(d/36e5);return L('Vu il y a ','Seen ')+(m<60?m+' min':h<24?h+' h':Math.round(h/24)+L(' j',' d'))+L('',' ago')};
+function ping(){if(!uid||me.hidden||document.hidden)return;db.doc('users/'+uid).set({lastSeen:Date.now()},{merge:true}).catch(()=>{})}
+setInterval(ping,120000);document.addEventListener('visibilitychange',ping);
+function bump(mid,txt){const o=mid.split('_').find(x=>x!==uid);db.doc('matches/'+mid).update({lastText:txt.slice(0,60),lastAt:TS(),lastFrom:uid,['unread.'+o]:firebase.firestore.FieldValue.increment(1)}).catch(()=>{})}
+async function translate(txt){const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt.slice(0,450))+'&langpair=autodetect|'+lang),j=await r.json();if(!j.responseData||!j.responseData.translatedText)throw 0;return j.responseData.translatedText}
+function openImg(src){const v=document.createElement('div');v.className='view';v.innerHTML=`<div style="padding:12px 14px;display:flex;justify-content:space-between"><a href="${src}" download="bolingo.jpg" style="color:#fff;font-size:16px;text-decoration:none">💾 ${t('Enregistrer la photo')}</a><button style="background:none;border:0;color:#fff;font-size:22px">✕</button></div><img src="${src}">`;document.body.appendChild(v);v.onclick=e=>{if(e.target.tagName!=='A')v.remove()}}
+
+/* ---- Connexion par téléphone ---- */
+function phoneAuth(){const o=document.createElement('div');o.className='ov';
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">📱 ${t('Connexion par téléphone')}</h3><div id="s1"><input id="pnum" type="tel" value="+243" placeholder="+243…"><div class="err" id="pe"></div><button class="btn" id="sc">${t('Recevoir le code SMS')}</button></div><div id="s2" style="display:none"><input id="cd" inputmode="numeric" maxlength="6" placeholder="${t('Code à 6 chiffres')}"><div class="err" id="pe2"></div><button class="btn" id="vc">${t('Valider')}</button></div><button class="btn s" id="px">${t('Fermer')}</button></div>`;
+ document.body.appendChild(o);let conf=null,ver=null;$('px').onclick=()=>o.remove();
+ $('sc').onclick=async()=>{const n=$('pnum').value.replace(/\s/g,'');if(!/^\+\d{8,15}$/.test(n)){$('pe').textContent=t('Numéro invalide (format +243…)');return}
+  try{ver=ver||new firebase.auth.RecaptchaVerifier('sc',{size:'invisible'});conf=await auth.signInWithPhoneNumber(n,ver);$('s1').style.display='none';$('s2').style.display=''}catch(e){$('pe').textContent=fr(e);try{ver.clear()}catch(x){}ver=null}};
+ $('vc').onclick=async()=>{try{await conf.confirm($('cd').value.trim());o.remove()}catch(e){$('pe2').textContent=fr(e)}}}
+
+/* ---- Support, vérification, administration ---- */
+function contactSheet(){const o=document.createElement('div');o.className='ov';
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">📮 ${t('Nous contacter')}</h3><label>${t('Sujet')}</label><select id="ty"><option value="bug">${t('Signaler un problème')}</option><option value="profil">${t('Signaler un profil')}</option><option value="idea">${t('Faire une suggestion')}</option><option value="other">${t('Autre')}</option></select><input id="abn" placeholder="${t('Nom du profil concerné')}" style="display:none"><label>${t('Message')}</label><textarea id="tx" rows="5" maxlength="1000"></textarea><div class="err" id="er"></div><button class="btn" id="sn">${t('Envoyer')}</button><button class="btn s" id="cx">${t('Fermer')}</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cx').onclick=()=>o.remove();
+ $('ty').onchange=()=>{$('abn').style.display=$('ty').value==='profil'?'':'none'};
+ $('sn').onclick=async()=>{const tx=$('tx').value.trim();if(!tx){$('er').textContent=L('Écris un message.','Write a message.');return}
+  try{await db.collection('tickets').add({from:uid,type:$('ty').value,aboutName:$('abn').value.trim(),text:tx,status:'new',at:TS()});o.remove();alert(L('Merci, message envoyé à l’équipe Bolingo.','Thanks, message sent to the Bolingo team.'))}catch(e){$('er').textContent=e.message}}}
+async function verifySheet(){const o=document.createElement('div');o.className='ov';let st='';
+ try{const d=await db.doc('verifs/'+uid).get();st=d.exists?d.data().status:''}catch(e){}
+ const msg=me.verified?L('✅ Ton profil est vérifié.','✅ Your profile is verified.'):st==='pending'?L('⏳ Demande en cours d’examen.','⏳ Request under review.'):st==='rejected'?L('Demande refusée. Tu peux réessayer avec un selfie plus net.','Request rejected. You can retry with a clearer selfie.'):L('Prends un selfie net, visage bien visible, identique à tes photos. Notre équipe le vérifiera et tu recevras le badge ✔.','Take a clear selfie, face visible, matching your photos. Our team will review it and you’ll get the ✔ badge.');
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">✅ ${t('Faire vérifier mon profil')}</h3><p>${msg}</p>${me.verified||st==='pending'?'':`<input id="vfi" type="file" accept="image/*" capture="user" style="display:none"><button class="btn" id="vs">📸 ${L('Prendre un selfie','Take a selfie')}</button>`}<div class="err" id="er"></div><button class="btn s" id="cx">${t('Fermer')}</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cx').onclick=()=>o.remove();
+ if($('vs')){$('vs').onclick=()=>$('vfi').click();$('vfi').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const photo=await resize(f);await db.doc('verifs/'+uid).set({photo,status:'pending',at:TS()});o.remove();alert(L('Selfie envoyé. Tu seras notifié après examen.','Selfie sent. You’ll be notified after review.'))}catch(x){$('er').textContent=x.message}}}}
+async function viewAdmin(){
+ nav.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+ app.innerHTML=`<div class="tabs"><button data-t="t" class="${atab==='t'?'on':''}">📮</button><button data-t="v" class="${atab==='v'?'on':''}">✅</button><button data-t="m" class="${atab==='m'?'on':''}">👥</button><button data-t="s" class="${atab==='s'?'on':''}">📊</button></div><div id="ad"><div class="spin"></div></div>`;
+ app.querySelector('.tabs').onclick=e=>{const k=e.target.dataset&&e.target.dataset.t;if(k){atab=k;viewAdmin()}};
+ try{await loadUsers(true);({t:admTickets,v:admVerifs,m:admMembers,s:admStats})[atab]($('ad'))}catch(e){$('ad').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
+async function admTickets(D){const s=await db.collection('tickets').get(),a=s.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.at?y.at.seconds:0)-(x.at?x.at.seconds:0));
+ D.innerHTML=a.length?'':'<p class="muted">Aucun message.</p>';
+ a.forEach(k=>{const u=uOf(k.from),el=document.createElement('div');el.className='box';el.style.margin='8px 0';
+  el.innerHTML=`<b>${esc(k.type)}</b> · ${esc(u.name)} ${k.status==='done'?'✅':'🆕'}<br>${k.about?'→ '+esc(uOf(k.about).name)+'<br>':''}${k.aboutName?'→ '+esc(k.aboutName)+'<br>':''}${esc(k.text)}<div class="g" style="margin-top:8px"><button class="btn s" data-a="d" style="margin:0">✔ Traité</button>${k.about?'<button class="btn s" data-a="u" style="margin:0">👤 Membre</button>':''}</div>`;
+  el.onclick=async e=>{const x=e.target.dataset&&e.target.dataset.a;if(x==='d'){try{await db.collection('tickets').doc(k.id).update({status:'done'});viewAdmin()}catch(er){alert(er.message)}}if(x==='u')memberSheet(uOf(k.about))};D.appendChild(el)})}
+async function admVerifs(D){const s=await db.collection('verifs').get(),a=s.docs.map(d=>({id:d.id,...d.data()})).filter(v=>v.status==='pending');
+ D.innerHTML=a.length?'':'<p class="muted">Aucune demande en attente.</p>';
+ a.forEach(v=>{const u=uOf(v.id),el=document.createElement('div');el.className='box';el.style.margin='8px 0';
+  el.innerHTML=`<b>${esc(u.name)} ${esc(u.lastName)}</b><div class="g" style="margin:8px 0"><img src="${v.photo}" style="width:100%;border-radius:10px"><img src="${(u.photos||[])[0]||''}" style="width:100%;border-radius:10px"></div><div class="g"><button class="btn" data-a="y" style="margin:0">✔ Approuver</button><button class="btn s" data-a="n" style="margin:0">✕ Refuser</button></div>`;
+  el.onclick=async e=>{const x=e.target.dataset&&e.target.dataset.a;if(!x)return;try{await db.collection('verifs').doc(v.id).update({status:x==='y'?'approved':'rejected'});await db.doc('users/'+v.id).update({verified:x==='y'});notify(v.id,'news',{text:x==='y'?'✅ Ton profil est vérifié !':'Ta demande de vérification a été refusée. Réessaie avec un selfie plus net.'});viewAdmin()}catch(er){alert(er.message)}};D.appendChild(el)})}
+function admMembers(D){D.innerHTML='<input id="aq" placeholder="Rechercher un membre…"><div id="al"></div>';
+ const show=()=>{const q=$('aq').value.trim().toLowerCase(),l=$('al');l.innerHTML='';allUsers.filter(u=>u.name&&(!q||hay(u).includes(q))).slice(0,40).forEach(u=>l.appendChild(userRow(u,()=>memberSheet(u))))};$('aq').oninput=show;show()}
+function memberSheet(u){const o=document.createElement('div');o.className='ov';
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${esc(u.name)} ${esc(u.lastName)} ${u.verified?'✔':''} ${u.suspended?'⛔':''}</h3><p class="muted">${esc(u.city)} · ${esc(u.job)}</p><button class="btn s" id="m1">${u.suspended?'Réactiver le compte':'⛔ Suspendre'}</button><button class="btn s" id="m2">⚠️ Avertir</button><button class="btn s" id="m3">${u.verified?'Retirer le badge ✔':'Donner le badge ✔'}</button><button class="btn s" id="m4" style="color:#b91c1c;border-color:#b91c1c">🗑 Supprimer le profil</button><button class="btn" id="m5">Fermer</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};
+ const U=db.doc('users/'+u.id),run=async f=>{try{await f();o.remove();viewAdmin()}catch(e){alert(e.message)}};
+ $('m1').onclick=()=>run(()=>U.update({suspended:!u.suspended}));
+ $('m2').onclick=()=>{const tx=prompt('Message d’avertissement :');if(tx)run(async()=>{await U.update({warning:tx});await notify(u.id,'warn',{text:tx})})};
+ $('m3').onclick=()=>run(()=>U.update({verified:!u.verified}));
+ $('m4').onclick=()=>{if(confirm('Supprimer le profil de '+u.name+' ?'))run(()=>U.delete())};$('m5').onclick=()=>o.remove()}
+async function admStats(D){const q=n=>db.collection(n).get().then(s=>s.size).catch(()=>'?');
+ const [us,po,st,ma,tk,vf2]=await Promise.all([q('users'),q('posts'),q('stories'),q('matches'),q('tickets'),q('verifs')]);
+ D.innerHTML=`<div class="box">${[['👥 Membres',us],['🟢 En ligne',allUsers.filter(online).length],['📰 Publications',po],['📸 Stories',st],['💞 Matchs',ma],['📮 Messages support',tk],['✅ Demandes de vérification',vf2]].map(x=>`<div class="sw"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>`}
 
 /* ---- Démarrage ---- */
-document.documentElement.lang=lang;if(LS.g('dm'))document.body.classList.add('dark');buildNav();
+document.documentElement.lang=lang;if(LS.g('dm'))document.body.classList.add('dark');buildNav();$('hb').onclick=()=>go('notifs');
 auth.onAuthStateChanged(async u=>{
- stop();if(!u){uid=null;me={};viewAuth();return}
+ stop();if(unL){unL();unL=null}if(!u){uid=null;me={};isAdm=false;nots=[];mats=[];viewAuth();return}
  uid=u.uid;nav.style.display='flex';buildNav();spin();
  try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{}}catch(e){me={}}
  try{blocked=new Set();(await db.collection('blocks').where('by','==',uid).get()).forEach(d=>blocked.add(d.data().target));favs=new Set();(await db.collection('favs').where('by','==',uid).get()).forEach(d=>favs.add(d.data().target));cleanStories()}catch(e){}
+ try{isAdm=(await db.doc('admins/'+uid).get()).exists}catch(e){isAdm=false}
+ try{await loadUsers(true)}catch(e){}
+ if(me.suspended){nav.style.display='none';$('hf').style.display='none';$('hb').style.display='none';app.innerHTML=`<div class="box muted"><h2>⛔ ${L('Compte suspendu','Account suspended')}</h2><p>${L('Ton compte a été suspendu par l’équipe Bolingo. Tu peux nous écrire pour contester.','Your account was suspended by the Bolingo team. You can write to us to appeal.')}</p><button class="btn" id="sp1">${t('Nous contacter')}</button><button class="btn s" id="sp2">${t('Se déconnecter')}</button></div>`;$('sp1').onclick=()=>contactSheet();$('sp2').onclick=()=>auth.signOut();return}
+ if(me.warning&&LS.g('w')!==me.warning){LS.s('w',me.warning);alert('⚠️ '+me.warning)}
+ $('hb').style.display='';unL=listen();ping();
  if(!me.name||!me.gender||!(me.photos&&me.photos.length)){nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==='profile'));viewProfile(true)}else go('swipe')});
 </script></body></html>
