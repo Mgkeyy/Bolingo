@@ -102,7 +102,7 @@ function viewAuth(mode='in'){
  <div class="tabs"><button id="t1" class="${mode==='in'?'on':''}">${t('Connexion')}</button><button id="t2" class="${mode==='up'?'on':''}">${t('Inscription')}</button></div>
  <form id="f"><input id="em" type="email" placeholder="${t('E-mail')}" autocomplete="email" required>
  <input id="pw" type="password" placeholder="${t('Mot de passe')}" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
- <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?t('Se connecter'):t('Créer mon compte')}</button></form>
+ ${mode==='up'?`<p class="muted" style="font-size:12px;margin:0 0 8px">${L('En créant un compte, tu confirmes avoir 18 ans ou plus et acceptes que les contenus et conversations signalés puissent être examinés par l’équipe de modération.','By creating an account, you confirm you are 18 or older and agree that reported content and conversations may be reviewed by the moderation team.')}</p>`:''}<div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?t('Se connecter'):t('Créer mon compte')}</button></form>
  <button class="btn s" id="gg">${t('Continuer avec Google')}</button>
  ${mode==='in'?`<p class="muted"><a href="#" id="fg">${t('Mot de passe oublié ?')}</a></p>`:''}
  <p class="muted"><a href="#" id="lg2">${lang==='fr'?'English':'Français'}</a></p></div>`;
@@ -110,7 +110,7 @@ function viewAuth(mode='in'){
  $('lg2').onclick=e=>{e.preventDefault();setLang(lang==='fr'?'en':'fr',()=>viewAuth(mode))};
  const er=m=>$('err').textContent=m;
  $('f').onsubmit=async e=>{e.preventDefault();$('go').disabled=true;er('');
-  try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}catch(x){er(fr(x));$('go').disabled=false}};
+  try{const a=$('em').value.trim(),b=$('pw').value;if(mode==='in')await auth.signInWithEmailAndPassword(a,b);else{const c=await auth.createUserWithEmailAndPassword(a,b);try{await c.user.sendEmailVerification()}catch(e){}}}catch(x){er(fr(x));$('go').disabled=false}};
  $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};
  if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er(L('Entre ton e-mail puis touche « Mot de passe oublié ».','Enter your email then tap “Forgot password?”.'));
   try{await auth.sendPasswordResetEmail(a);er('');alert(L('E-mail de réinitialisation envoyé.','Reset email sent.'))}catch(x){er(fr(x))}}}
@@ -158,7 +158,7 @@ function pass(u){
  if(flt.city&&!Lw(u.city).includes(Lw(flt.city)))return false;if(flt.school&&!Lw(u.school).includes(Lw(flt.school)))return false;if(flt.church&&!Lw(u.church).includes(Lw(flt.church)))return false;
  if(flt.religion&&u.religion!==flt.religion)return false;if(flt.interest&&!(u.interests||[]).some(i=>Lw(i).includes(Lw(flt.interest))))return false;return true}
 const hay=u=>[u.name,u.lastName,u.city,u.job,u.school,u.church,u.religion,(u.interests||[]).join(' ')].join(' ').toLowerCase();
-async function doSwipe(u,type){await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS()});
+async function doSwipe(u,type){await db.doc('swipes/'+uid+'_'+u.id).set({from:uid,to:u.id,type,at:TS(),reshow:(u._re||0)+(u._again?1:0)});
  if(type!=='pass'){notify(u.id,type);const b=await db.doc('swipes/'+u.id+'_'+uid).get();
   if(b.exists&&b.data().type!=='pass'){const us=[uid,u.id].sort();await db.doc('matches/'+us.join('_')).set({users:us,at:TS()});notify(u.id,'match');return true}}return false}
 async function viewSwipe(){
@@ -168,9 +168,9 @@ async function viewSwipe(){
   const r=allUsers.filter(u=>u.id!==uid&&u.name&&!u.hidden&&!blocked.has(u.id)&&hay(u).includes(q)).slice(0,30);
   if(!r.length){$('res').innerHTML=`<p class="muted">${t('Aucun résultat')}</p>`;return}
   r.forEach(u=>{const it=document.createElement('div');it.className='item';it.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc(u.name[0])}</div><div><b>${esc(u.name)} ${esc(u.lastName)}${age(u.birth)?', '+age(u.birth):''}</b><div class="muted" style="text-align:left;font-size:13px">${[u.job,u.city].filter(Boolean).map(esc).join(' · ')}</div></div>`;it.onclick=()=>detail(u,{like:1});$('res').appendChild(it)})};
- try{const done=new Set();(await db.collection('swipes').where('from','==',uid).get()).forEach(d=>done.add(d.data().to));
+ try{const done=new Map();(await db.collection('swipes').where('from','==',uid).get()).forEach(d=>done.set(d.data().to,d.data()));
   allUsers=[];(await db.collection('users').limit(200).get()).forEach(d=>allUsers.push({id:d.id,...d.data()}));
-  const deck=allUsers.filter(u=>!done.has(u.id)&&pass(u)).sort(()=>Math.random()-.5).sort((a,b)=>bst(b)-bst(a));showDeck(deck)}
+  const deck=allUsers.filter(u=>{const d=done.get(u.id);if(d){if(!(d.type==='pass'&&bst(u)&&(d.reshow||0)<3))return false;u._again=true;u._re=d.reshow||0}else{u._again=false;u._re=0}return pass(u)}).sort(()=>Math.random()-.5).sort((a,b)=>bst(b)-bst(a));showDeck(deck)}
  catch(e){$('dk').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
 function cardHTML(u,back){
  return `<div class="card ${back?'back':''}" style="${bg(u)}">${back?'':`<div class="dots">${(u.photos||[]).map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>${bst(u)?'<div class="bdg">⭐ Boost</div>':''}<div class="stamp st-l">LIKE</div><div class="stamp st-n">NOPE</div><button class="ibtn">ℹ</button>`}
@@ -230,7 +230,7 @@ async function viewSettings(){
  spin();let n=0,rerr='';try{n=(await db.collection('referrals').where('inviter','==',uid).get()).size}catch(e){rerr=e.code||e.message}
  const bal=n*5-(me.spent||0),on=bst(me);
  app.innerHTML=`<div class="box"><h3 style="margin-top:0">⭐ ${t('Étoiles & invitations')}</h3>
- <p class="muted" style="margin:0">${L('Invite tes amis : tu gagnes 5 étoiles pour chaque personne qui s’inscrit avec ton lien. Les étoiles servent à mettre ton profil en avant.','Invite friends: earn 5 stars for each person who signs up with your link. Stars push your profile to the top.')}</p>
+ <p class="muted" style="margin:0">${L('Invite tes amis : tu gagnes 5 étoiles pour chaque personne qui s’inscrit avec ton lien. Un boost de 24 h (5 ⭐) met ton profil en premier et le fait revenir jusqu’à 3 fois chez ceux qui t’ont passé.','Invite friends: earn 5 stars for each person who signs up with your link. A 24h boost (5 ⭐) puts your profile first and brings it back up to 3 times for people who passed you.')}</p>
  <div class="stars">${bal}<small> ⭐</small></div><p class="muted" style="margin:0">${L(n+' personne(s) invitée(s)',n+' friend(s) invited')}</p>${rerr?`<p class="err">⚠ ${esc(rerr)}</p>`:''}<p class="muted" style="font-size:11px;word-break:break-all;margin:6px 0 0">${t('Code d’invitation')} : ${uid}</p>
  <button class="btn" id="sh">${t('Partager mon lien')}</button>
  <button class="btn s" id="bo" ${bal<5?'disabled':''}>🚀 ${L('Booster mon profil 24 h (5 ⭐)','Boost my profile for 24h (5 ⭐)')}</button>
@@ -411,8 +411,8 @@ async function viewAdmin(){
 async function admTickets(D){const s=await db.collection('tickets').get(),a=s.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.at?y.at.seconds:0)-(x.at?x.at.seconds:0));
  D.innerHTML=a.length?'':'<p class="muted">Aucun message.</p>';
  a.forEach(k=>{const u=uOf(k.from),el=document.createElement('div');el.className='box';el.style.margin='8px 0';
-  el.innerHTML=`<b>${esc(k.type)}</b> · ${esc(u.name)} ${k.status==='done'?'✅':'🆕'}<br>${k.about?'→ '+esc(uOf(k.about).name)+'<br>':''}${k.aboutName?'→ '+esc(k.aboutName)+'<br>':''}${esc(k.text)}<div class="g" style="margin-top:8px"><button class="btn s" data-a="d" style="margin:0">✔ Traité</button>${k.about?'<button class="btn s" data-a="u" style="margin:0">👤 Membre</button>':''}</div>`;
-  el.onclick=async e=>{const x=e.target.dataset&&e.target.dataset.a;if(x==='d'){try{await db.collection('tickets').doc(k.id).update({status:'done'});viewAdmin()}catch(er){alert(er.message)}}if(x==='u')memberSheet(uOf(k.about))};D.appendChild(el)})}
+  el.innerHTML=`<b>${esc(k.type)}</b> · ${esc(u.name)} ${k.status==='done'?'✅':'🆕'}<br>${k.about?'→ '+esc(uOf(k.about).name)+'<br>':''}${k.aboutName?'→ '+esc(k.aboutName)+'<br>':''}${esc(k.text)}<div class="g" style="margin-top:8px"><button class="btn s" data-a="d" style="margin:0">✔ Traité</button>${k.about?'<button class="btn s" data-a="u" style="margin:0">👤 Membre</button><button class="btn s" data-a="c" style="margin:0">💬 Conversations</button>':''}</div>`;
+  el.onclick=async e=>{const x=e.target.dataset&&e.target.dataset.a;if(x==='d'){try{await db.collection('tickets').doc(k.id).update({status:'done'});viewAdmin()}catch(er){alert(er.message)}}if(x==='u')memberSheet(uOf(k.about));if(x==='c')admConvos(uOf(k.about),'Signalement '+k.type+' : '+String(k.text).slice(0,60))};D.appendChild(el)})}
 async function admVerifs(D){const s=await db.collection('verifs').get(),a=s.docs.map(d=>({id:d.id,...d.data()})).filter(v=>v.status==='pending');
  D.innerHTML=a.length?'':'<p class="muted">Aucune demande en attente.</p>';
  a.forEach(v=>{const u=uOf(v.id),el=document.createElement('div');el.className='box';el.style.margin='8px 0';
@@ -421,16 +421,49 @@ async function admVerifs(D){const s=await db.collection('verifs').get(),a=s.docs
 function admMembers(D){D.innerHTML='<input id="aq" placeholder="Rechercher un membre…"><div id="al"></div>';
  const show=()=>{const q=$('aq').value.trim().toLowerCase(),l=$('al');l.innerHTML='';allUsers.filter(u=>u.name&&(!q||hay(u).includes(q))).slice(0,40).forEach(u=>l.appendChild(userRow(u,()=>memberSheet(u))))};$('aq').oninput=show;show()}
 function memberSheet(u){const o=document.createElement('div');o.className='ov';
- o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${esc(u.name)} ${esc(u.lastName)} ${u.verified?'✔':''} ${u.suspended?'⛔':''}</h3><p class="muted">${esc(u.city)} · ${esc(u.job)}</p><button class="btn s" id="m1">${u.suspended?'Réactiver le compte':'⛔ Suspendre'}</button><button class="btn s" id="m2">⚠️ Avertir</button><button class="btn s" id="m3">${u.verified?'Retirer le badge ✔':'Donner le badge ✔'}</button><button class="btn s" id="m4" style="color:#b91c1c;border-color:#b91c1c">🗑 Supprimer le profil</button><button class="btn" id="m5">Fermer</button></div>`;
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${esc(u.name)} ${esc(u.lastName)} ${u.verified?'✔':''} ${u.suspended?'⛔':''}</h3><p class="muted">${esc(u.city)} · ${esc(u.job)}</p><button class="btn s" id="mi">🔎 Infos complètes</button><button class="btn s" id="mc2">💬 Conversations (motif requis)</button><button class="btn s" id="m1">${u.suspended?'Réactiver le compte':'⛔ Suspendre'}</button><button class="btn s" id="m2">⚠️ Avertir</button><button class="btn s" id="m3">${u.verified?'Retirer le badge ✔':'Donner le badge ✔'}</button><button class="btn s" id="m4" style="color:#b91c1c;border-color:#b91c1c">🗑 Supprimer le profil</button><button class="btn" id="m5">Fermer</button></div>`;
  document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};
  const U=db.doc('users/'+u.id),run=async f=>{try{await f();o.remove();viewAdmin()}catch(e){alert(e.message)}};
  $('m1').onclick=()=>run(()=>U.update({suspended:!u.suspended}));
  $('m2').onclick=()=>{const tx=prompt('Message d’avertissement :');if(tx)run(async()=>{await U.update({warning:tx});await notify(u.id,'warn',{text:tx})})};
  $('m3').onclick=()=>run(()=>U.update({verified:!u.verified}));
- $('m4').onclick=()=>{if(confirm('Supprimer le profil de '+u.name+' ?'))run(()=>U.delete())};$('m5').onclick=()=>o.remove()}
+ $('m4').onclick=()=>{if(confirm('Supprimer le profil de '+u.name+' ?'))run(()=>U.delete())};$('mi').onclick=()=>admInfo(u);$('mc2').onclick=()=>admConvos(u);$('m5').onclick=()=>o.remove()}
 async function admStats(D){const q=n=>db.collection(n).get().then(s=>s.size).catch(()=>'?');
  const [us,po,st,ma,tk,vf2]=await Promise.all([q('users'),q('posts'),q('stories'),q('matches'),q('tickets'),q('verifs')]);
  D.innerHTML=`<div class="box">${[['👥 Membres',us],['🟢 En ligne',allUsers.filter(online).length],['📰 Publications',po],['📸 Stories',st],['💞 Matchs',ma],['📮 Messages support',tk],['✅ Demandes de vérification',vf2]].map(x=>`<div class="sw"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>`}
+
+/* ---- Vérification e-mail & consultation administrateur ---- */
+function viewVerify(u){nav.style.display='none';$('hf').style.display='none';$('hb').style.display='none';buildNav();
+ app.innerHTML=`<div class="box" style="text-align:center"><div class="hero">${LOGO(72)}</div><h2>${L('Vérifie ton e-mail','Verify your email')}</h2><p class="muted">${L('Nous avons envoyé un lien de vérification à','We sent a verification link to')}<br><b>${esc(u.email)}</b><br>${L('Ouvre-le, puis reviens ici. Regarde aussi dans les spams.','Open it, then come back here. Check your spam folder too.')}</p><div class="err" id="er"></div><button class="btn" id="vk">${L('J’ai vérifié mon e-mail','I verified my email')}</button><button class="btn s" id="vr">${L('Renvoyer le lien','Resend the link')}</button><button class="btn s" id="vo">${t('Se déconnecter')}</button></div>`;
+ const ok2=async()=>{await auth.currentUser.getIdToken(true);location.reload()};
+ $('vk').onclick=async()=>{try{await u.reload();if(auth.currentUser.emailVerified)await ok2();else $('er').textContent=L('Pas encore vérifié. Ouvre le lien reçu par e-mail.','Not verified yet. Open the link sent by email.')}catch(e){$('er').textContent=fr(e)}};
+ $('vo').onclick=()=>auth.signOut();
+ $('vr').onclick=async()=>{try{await u.sendEmailVerification();$('er').textContent=L('Lien renvoyé.','Link sent.')}catch(e){$('er').textContent=fr(e)}};
+ const iv=setInterval(async()=>{if(!$('vk')){clearInterval(iv);return}try{await u.reload();if(auth.currentUser.emailVerified){clearInterval(iv);await ok2()}}catch(e){}},5000)}
+function admInfo(u){const o=document.createElement('div');o.className='ov';
+ const rows=Object.entries(u).filter(([k])=>!['photos','id'].includes(k)).map(([k,v])=>`<p style="margin:4px 0;word-break:break-word"><b>${esc(k)} :</b> ${esc(typeof v==='object'?JSON.stringify(v):v)}</p>`).join('');
+ o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${esc(u.name)} ${esc(u.lastName)}</h3><p class="muted" style="font-size:12px;word-break:break-all;text-align:left">UID : ${esc(u.id)}</p>${(u.photos||[]).map(p=>`<img class="big" src="${p}">`).join('')}${rows}<button class="btn" id="cli">Fermer</button></div>`;
+ document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cli').onclick=()=>o.remove()}
+async function admConvos(u,reason){
+ const why=reason||prompt('Motif de la consultation (obligatoire, ex : signalement de harcèlement) :');
+ if(!why||why.trim().length<5){alert('Motif obligatoire (5 caractères minimum).');return}
+ try{const s=await db.collection('matches').where('users','array-contains',u.id).get();
+  await db.collection('adminLogs').add({admin:uid,target:u.id,action:'list_conversations',reason:why.trim(),at:TS()});
+  const o=document.createElement('div');o.className='ov';
+  o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">💬 ${esc(u.name)}</h3><p class="muted" style="text-align:left;font-size:12px">Lecture seule : aucun accusé de lecture ni notification n’est envoyé aux membres. Chaque consultation est enregistrée dans le journal.</p><div id="cv"></div><button class="btn" id="cx2">Fermer</button></div>`;
+  document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cx2').onclick=()=>o.remove();
+  const cv=$('cv');if(s.empty)cv.innerHTML='<p class="muted">Aucune conversation.</p>';
+  s.forEach(d=>{const m=d.data(),oid=m.users.find(x=>x!==u.id),w=uOf(oid);cv.appendChild(userRow(w,()=>admRead(d.id,u,w,why)))})}catch(e){alert(e.message)}}
+async function admRead(mid,u,w,why){
+ try{const s=await db.collection('matches/'+mid+'/messages').orderBy('at').get();
+  await db.collection('adminLogs').add({admin:uid,target:u.id,action:'read_conversation',matchId:mid,reason:why.trim(),at:TS()});
+  const o=document.createElement('div');o.className='ov';
+  o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">${esc(u.name)} ↔ ${esc(w.name)}</h3><div id="mg"></div><button class="btn" id="cx3">Fermer</button></div>`;
+  document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('cx3').onclick=()=>o.remove();
+  const g=$('mg');if(s.empty)g.innerHTML='<p class="muted">Aucun message.</p>';
+  s.forEach(d=>{const x=d.data(),p=document.createElement('p');p.style.cssText='margin:8px 0;word-break:break-word';
+   p.innerHTML=`<b>${esc(uOf(x.from).name)}</b> <span class="muted" style="font-size:12px">${x.at?x.at.toDate().toLocaleString():''}</span><br>`;
+   if(x.img){const i=document.createElement('img');i.src=x.img;i.style.cssText='max-width:70%;border-radius:10px';i.onclick=()=>openImg(x.img);p.appendChild(i)}else p.appendChild(document.createTextNode(x.text));g.appendChild(p)})}catch(e){alert(e.message)}}
 
 /* ---- Bouton retour du téléphone & installation ---- */
 const PARENT={chat:'matches',matches:'swipe',moments:'swipe',profile:'swipe',settings:'swipe',notifs:'swipe',admin:'settings'};
@@ -451,6 +484,7 @@ const isStandalone=()=>installed||matchMedia('(display-mode: standalone)').match
 document.documentElement.lang=lang;if(LS.g('dm'))document.body.classList.add('dark');buildNav();$('hb').onclick=()=>go('notifs');
 auth.onAuthStateChanged(async u=>{
  stop();if(unL){unL();unL=null}if(!u){uid=null;me={};isAdm=false;nots=[];mats=[];viewAuth();return}
+ if(u.providerData[0]&&u.providerData[0].providerId==='password'&&!u.emailVerified){uid=null;viewVerify(u);return}
  uid=u.uid;nav.style.display='flex';buildNav();spin();
  try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{}}catch(e){me={}}
  try{blocked=new Set();(await db.collection('blocks').where('by','==',uid).get()).forEach(d=>blocked.add(d.data().target));favs=new Set();(await db.collection('favs').where('by','==',uid).get()).forEach(d=>favs.add(d.data().target));cleanStories()}catch(e){}
