@@ -78,7 +78,7 @@ const EN={'Connexion':'Log in','Inscription':'Sign up','E-mail':'Email','Mot de 
 'Genre':'Gender','Commune':'City','Taille':'Height','Profession':'Job','Église':'Church','Recherche':'Looking for','Filtres de recherche':'Search filters','Âge min.':'Min age','Âge max.':'Max age','Taille min. (cm)':'Min height (cm)','Centre d’intérêt':'Interest','Appliquer':'Apply','Réinitialiser':'Reset',
 'Pas encore de match':'No matches yet','Continue à swiper !':'Keep swiping!','Mes matchs':'My matches','Envoyer':'Send','Message…':'Message…','C’est un match ! 💞':'It’s a match! 💞','Envoyer un message':'Send a message','Continuer':'Continue',
 'Étoiles & invitations':'Stars & invitations','Partager mon lien':'Share my link','Langue':'Language','Photo illisible.':'Unreadable photo.','Le prénom est obligatoire.':'First name is required.','Choisis ton genre.':'Choose your gender.','Tu dois avoir 18 ans ou plus.':'You must be 18 or older.','Ajoute au moins une photo.':'Add at least one photo.','Installer l’application':'Install the app',
-'Moments':'Moments','Favoris':'Favorites','Intention':'Intent','Amitié':'Friendship','Relation sérieuse':'Serious relationship','Rencontre amoureuse':'Romantic dating','Discussion':'Chatting','Réseau social':'Social networking','💛 Ajouter aux favoris':'💛 Add to favorites','💛 Retirer des favoris':'💛 Remove from favorites','🚫 Bloquer':'🚫 Block','Mode sombre':'Dark mode','Mode invisible':'Invisible mode','Débloquer':'Unblock','Quoi de neuf ?':'What’s new?','Photo':'Photo','Publier':'Post','Ma story':'My story','Moi':'Me','Commenter':'Comment','Commentaires':'Comments','Écrire un commentaire…':'Write a comment…','Notifications':'Notifications','Voir les notifications':'View notifications','Intérêts':'Interests','Nous contacter':'Contact us','Sujet':'Subject','Signaler un problème':'Report a problem','Signaler un profil':'Report a profile','Faire une suggestion':'Make a suggestion','Message':'Message','Nom du profil concerné':'Name of the profile','Faire vérifier mon profil':'Get my profile verified','Profil vérifié':'Verified profile','Connexion par téléphone':'Phone login','Recevoir le code SMS':'Get SMS code','Code à 6 chiffres':'6-digit code','Valider':'Confirm','Numéro invalide (format +243…)':'Invalid number (format +243…)','Continuer avec le téléphone':'Continue with phone','En ligne':'Online','Enregistrer la photo':'Save photo'};
+'Moments':'Moments','Favoris':'Favorites','Intention':'Intent','Amitié':'Friendship','Relation sérieuse':'Serious relationship','Rencontre amoureuse':'Romantic dating','Discussion':'Chatting','Réseau social':'Social networking','💛 Ajouter aux favoris':'💛 Add to favorites','💛 Retirer des favoris':'💛 Remove from favorites','🚫 Bloquer':'🚫 Block','Mode sombre':'Dark mode','Mode invisible':'Invisible mode','Débloquer':'Unblock','Quoi de neuf ?':'What’s new?','Photo':'Photo','Publier':'Post','Ma story':'My story','Moi':'Me','Commenter':'Comment','Commentaires':'Comments','Écrire un commentaire…':'Write a comment…','Notifications':'Notifications','Voir les notifications':'View notifications','Intérêts':'Interests','Nous contacter':'Contact us','Sujet':'Subject','Signaler un problème':'Report a problem','Signaler un profil':'Report a profile','Faire une suggestion':'Make a suggestion','Message':'Message','Nom du profil concerné':'Name of the profile','Faire vérifier mon profil':'Get my profile verified','Profil vérifié':'Verified profile','Connexion par téléphone':'Phone login','Recevoir le code SMS':'Get SMS code','Code à 6 chiffres':'6-digit code','Valider':'Confirm','Numéro invalide (format +243…)':'Invalid number (format +243…)','Continuer avec le téléphone':'Continue with phone','En ligne':'Online','Enregistrer la photo':'Save photo','Lien d’invitation (facultatif)':'Invitation link (optional)','Invitation détectée':'Invitation detected','Code d’invitation':'Invitation code'};
 const t=s=>lang==='en'&&EN[s]?EN[s]:s,L=(f,e)=>lang==='en'?e:f;
 const ERR={'auth/invalid-credential':['E-mail ou mot de passe incorrect.','Wrong email or password.'],'auth/invalid-email':['Adresse e-mail invalide.','Invalid email address.'],'auth/email-already-in-use':['Cet e-mail a déjà un compte. Connecte-toi.','This email already has an account. Log in.'],'auth/weak-password':['Mot de passe trop court (6 caractères min.).','Password too short (6+ characters).'],'auth/too-many-requests':['Trop d’essais. Réessaie plus tard.','Too many attempts. Try again later.'],'auth/network-request-failed':['Pas de connexion internet.','No internet connection.'],'auth/popup-closed-by-user':['',''],'auth/invalid-phone-number':['Numéro de téléphone invalide.','Invalid phone number.'],'auth/invalid-verification-code':['Code incorrect.','Wrong code.'],'auth/code-expired':['Code expiré.','Code expired.'],'auth/quota-exceeded':['Limite de SMS atteinte pour aujourd’hui.','Daily SMS limit reached.'],'auth/captcha-check-failed':['Vérification anti-robot échouée. Réessaie.','Anti-bot check failed. Try again.'],'auth/operation-not-allowed':['Méthode non activée.','Method not enabled.']};
 const fr=e=>ERR[e.code]?ERR[e.code][lang==='en'?1:0]:e.message;
@@ -93,7 +93,7 @@ const spin=()=>app.innerHTML='<div class="spin"></div>';
 function buildNav(){$('lg').innerHTML=LOGO(30,1)+' Bolingo';$('hf').textContent='🎛 '+t('Filtres');
  nav.innerHTML=[['swipe','🔥','Découvrir'],['moments','📰','Moments'],['matches','💬','Matchs'],['profile','👤','Profil'],['settings','⚙️','Réglages']].map(x=>`<button data-v="${x[0]}"><b>${x[1]}</b>${t(x[2])}</button>`).join('');badges()}
 nav.onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-function go(v,a){stop();chatOpen=null;nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,moments:viewMoments,notifs:viewNotifs,admin:viewAdmin,matches:viewMatches,profile:()=>viewProfile(),settings:viewSettings,chat:()=>viewChat(a)})[v]()}
+function go(v,a){stop();chatOpen=null;cur=v;ensureState();nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('hf').style.display=v==='swipe'?'':'none';window.scrollTo(0,0);({swipe:viewSwipe,moments:viewMoments,notifs:viewNotifs,admin:viewAdmin,matches:viewMatches,profile:()=>viewProfile(),settings:viewSettings,chat:()=>viewChat(a)})[v]()}
 
 /* ---- Connexion ---- */
 function viewAuth(mode='in'){
@@ -103,7 +103,7 @@ function viewAuth(mode='in'){
  <form id="f"><input id="em" type="email" placeholder="${t('E-mail')}" autocomplete="email" required>
  <input id="pw" type="password" placeholder="${t('Mot de passe')}" autocomplete="${mode==='in'?'current-password':'new-password'}" required minlength="6">
  <div class="err" id="err"></div><button class="btn" id="go">${mode==='in'?t('Se connecter'):t('Créer mon compte')}</button></form>
- <button class="btn s" id="gg">${t('Continuer avec Google')}</button><button class="btn s" id="pbtn">📱 ${t('Continuer avec le téléphone')}</button>
+ <button class="btn s" id="gg">${t('Continuer avec Google')}</button>
  ${mode==='in'?`<p class="muted"><a href="#" id="fg">${t('Mot de passe oublié ?')}</a></p>`:''}
  <p class="muted"><a href="#" id="lg2">${lang==='fr'?'English':'Français'}</a></p></div>`;
  $('t1').onclick=()=>viewAuth('in');$('t2').onclick=()=>viewAuth('up');
@@ -111,7 +111,7 @@ function viewAuth(mode='in'){
  const er=m=>$('err').textContent=m;
  $('f').onsubmit=async e=>{e.preventDefault();$('go').disabled=true;er('');
   try{const a=$('em').value.trim(),b=$('pw').value;mode==='in'?await auth.signInWithEmailAndPassword(a,b):await auth.createUserWithEmailAndPassword(a,b)}catch(x){er(fr(x));$('go').disabled=false}};
- $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};$('pbtn').onclick=phoneAuth;
+ $('gg').onclick=async()=>{try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(x){er(fr(x))}};
  if($('fg'))$('fg').onclick=async e=>{e.preventDefault();const a=$('em').value.trim();if(!a)return er(L('Entre ton e-mail puis touche « Mot de passe oublié ».','Enter your email then tap “Forgot password?”.'));
   try{await auth.sendPasswordResetEmail(a);er('');alert(L('E-mail de réinitialisation envoyé.','Reset email sent.'))}catch(x){er(fr(x))}}}
 function setLang(l,cb){lang=l;LS.s('bl',l);document.documentElement.lang=l;buildNav();cb()}
@@ -119,7 +119,8 @@ function setLang(l,cb){lang=l;LS.s('bl',l);document.documentElement.lang=l;build
 /* ---- Profil ---- */
 const REL=['','Chrétien','Catholique','Protestant','Musulman','Kimbanguiste','Autre','Sans religion'],INT=['','Amitié','Relation sérieuse','Rencontre amoureuse','Discussion','Réseau social'];
 function resize(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onerror=ko;r.onload=()=>{const i=new Image();i.onerror=ko;i.onload=()=>{const k=Math.min(1,640/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};i.src=r.result};r.readAsDataURL(file)})}
-async function claimRef(){const r=LS.g('ref');if(r&&r!==uid){try{await db.doc('referrals/'+uid).set({inviter:r,at:TS()})}catch(e){}}LS.s('ref','')}
+async function claimRef(x){let r=(x||LS.g('ref')||'').trim();const m=r.match(/ref=([A-Za-z0-9]+)/);if(m)r=m[1];
+ if(r&&r!==uid){try{await db.doc('referrals/'+uid).set({inviter:r,at:TS()});notify(r,'news',{text:L('⭐ +5 étoiles : '+(me.name||'un membre')+' a rejoint Bolingo grâce à ton lien !','⭐ +5 stars: '+(me.name||'a member')+' joined Bolingo with your link!')})}catch(e){toast('⚠ '+L('Parrainage non enregistré : ','Referral not saved: ')+(e.code||e.message),1)}}LS.s('ref','')}
 function viewProfile(first){
  const p=me,photos=[...(p.photos||[])];
  const sel=(id,o,v)=>`<select id="${id}">${o.map(x=>`<option value="${x}" ${x===v?'selected':''}>${x?t(x):''}</option>`).join('')}</select>`;
@@ -135,7 +136,7 @@ function viewProfile(first){
  <label>${t('Religion')}</label>${sel('religion',REL,p.religion)}
  ${inp('interests','Centres d’intérêt (séparés par des virgules)',(p.interests||[]).join(', '))}
  <label>${t('À propos de moi')}</label><textarea id="bio" rows="4" maxlength="400">${esc(p.bio)}</textarea>
- <div class="err" id="err"></div><button class="btn" id="save">${t('Enregistrer')}</button></div>`;
+ ${first&&!LS.g('ref')?`<label>${t('Lien d’invitation (facultatif)')}</label><input id="refin" placeholder="https://…?ref=…">`:''}${first&&LS.g('ref')?`<p class="muted">✅ ${t('Invitation détectée')}</p>`:''}<div class="err" id="err"></div><button class="btn" id="save">${t('Enregistrer')}</button></div>`;
  const draw=()=>{$('ph').innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('div');if(photos[i]){d.style.backgroundImage=`url(${photos[i]})`;const b=document.createElement('button');b.textContent='✕';b.onclick=()=>{photos.splice(i,1);draw()};d.appendChild(b)}else{d.textContent='+';d.onclick=()=>$('file').click()}$('ph').appendChild(d)}};draw();
  $('file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{photos.push(await resize(f));draw()}catch(x){$('err').textContent=t('Photo illisible.')}};
  const v=id=>$(id).value.trim(),er=m=>$('err').textContent=m;
@@ -144,7 +145,7 @@ function viewProfile(first){
   const a=age(v('birth'));if(a===null||a<18)return er(t('Tu dois avoir 18 ans ou plus.'));if(!photos.length)return er(t('Ajoute au moins une photo.'));
   const d={name:v('name'),lastName:v('lastName'),gender:$('gender').value,seeking:$('seeking').value,intent:$('intent').value,birth:v('birth'),city:v('city'),height:Number(v('height'))||null,job:v('job'),school:v('school'),church:v('church'),religion:$('religion').value,interests:v('interests').split(',').map(s=>s.trim()).filter(Boolean).slice(0,12),bio:v('bio'),photos};
   const isNew=!me.name;$('save').disabled=true;
-  try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};if(isNew)await claimRef();go('swipe')}catch(x){er(x.message);$('save').disabled=false}}}
+  try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};if(isNew)await claimRef($('refin')?$('refin').value:'');go('swipe')}catch(x){er(x.message);$('save').disabled=false}}}
 
 /* ---- Découvrir ---- */
 function pass(u){
@@ -226,25 +227,25 @@ async function share(){
  if(navigator.share){try{await navigator.share({title:'Bolingo',text,url});return}catch(e){if(e.name==='AbortError')return}}
  try{await navigator.clipboard.writeText(url);alert(L('Lien copié :\n','Link copied:\n')+url)}catch(e){prompt(L('Copie ce lien :','Copy this link:'),url)}}
 async function viewSettings(){
- spin();let n=0;try{n=(await db.collection('referrals').where('inviter','==',uid).get()).size}catch(e){}
+ spin();let n=0,rerr='';try{n=(await db.collection('referrals').where('inviter','==',uid).get()).size}catch(e){rerr=e.code||e.message}
  const bal=n*5-(me.spent||0),on=bst(me);
  app.innerHTML=`<div class="box"><h3 style="margin-top:0">⭐ ${t('Étoiles & invitations')}</h3>
  <p class="muted" style="margin:0">${L('Invite tes amis : tu gagnes 5 étoiles pour chaque personne qui s’inscrit avec ton lien. Les étoiles servent à mettre ton profil en avant.','Invite friends: earn 5 stars for each person who signs up with your link. Stars push your profile to the top.')}</p>
- <div class="stars">${bal}<small> ⭐</small></div><p class="muted" style="margin:0">${L(n+' personne(s) invitée(s)',n+' friend(s) invited')}</p>
+ <div class="stars">${bal}<small> ⭐</small></div><p class="muted" style="margin:0">${L(n+' personne(s) invitée(s)',n+' friend(s) invited')}</p>${rerr?`<p class="err">⚠ ${esc(rerr)}</p>`:''}<p class="muted" style="font-size:11px;word-break:break-all;margin:6px 0 0">${t('Code d’invitation')} : ${uid}</p>
  <button class="btn" id="sh">${t('Partager mon lien')}</button>
  <button class="btn s" id="bo" ${bal<5?'disabled':''}>🚀 ${L('Booster mon profil 24 h (5 ⭐)','Boost my profile for 24h (5 ⭐)')}</button>
  ${on?`<p class="muted">${L('Boost actif jusqu’au ','Boost active until ')}${new Date(me.boostUntil).toLocaleString(lang)}</p>`:''}</div>
  <div class="box" style="margin-top:12px"><h3 style="margin-top:0">🌐 ${t('Langue')}</h3><div class="g"><button class="btn ${lang==='fr'?'':'s'}" id="lf" style="margin:0">Français</button><button class="btn ${lang==='en'?'':'s'}" id="le" style="margin:0">English</button></div></div>
  <div class="box" style="margin-top:12px"><div class="sw"><span>🌙 ${t('Mode sombre')}</span><input type="checkbox" id="dm" style="width:auto;margin:0" ${document.body.classList.contains('dark')?'checked':''}></div><div class="sw"><span>👻 ${t('Mode invisible')}</span><input type="checkbox" id="iv" style="width:auto;margin:0" ${me.hidden?'checked':''}></div><p class="muted" style="font-size:12px;margin:0">${L('Invisible : ton profil n’apparaît plus dans Découvrir ni dans la recherche.','Invisible: your profile no longer appears in Discover or search.')}</p><div id="bl"></div></div>
  <div class="box" style="margin-top:12px"><button class="btn s" id="ct" style="margin-top:0">📮 ${t('Nous contacter')}</button><button class="btn s" id="vf2">✅ ${me.verified?t('Profil vérifié'):t('Faire vérifier mon profil')}</button>${isAdm?'<button class="btn" id="ad2">🛠 Espace administrateur</button>':''}</div>
- <div class="box" style="margin-top:12px">${dip?`<button class="btn" id="ins" style="margin-top:0">📲 ${t('Installer l’application')}</button>`:`<p class="muted" style="margin:0">📲 ${L('Installer l’application : menu ⋮ de Chrome → « Ajouter à l’écran d’accueil » (ou « Installer l’application »).','Install the app: Chrome menu ⋮ → “Add to Home screen” (or “Install app”).')}</p>`}
+ <div class="box" style="margin-top:12px">${isStandalone()?'':`<button class="btn" id="ins" style="margin-top:0">📲 ${t('Installer l’application')}</button>`}
  <p class="muted" style="font-size:13px">${esc(auth.currentUser&&auth.currentUser.email||'')}</p><button class="btn s" id="out">${t('Se déconnecter')}</button></div>`;
  $('sh').onclick=share;$('out').onclick=()=>auth.signOut();$('ct').onclick=()=>contactSheet();$('vf2').onclick=verifySheet;if($('ad2'))$('ad2').onclick=()=>go('admin');
  $('dm').onchange=e=>{document.body.classList.toggle('dark',e.target.checked);LS.s('dm',e.target.checked?'1':'')};
  $('iv').onchange=async e=>{try{await db.doc('users/'+uid).set({hidden:e.target.checked},{merge:true});me.hidden=e.target.checked}catch(x){alert(x.message)}};
  loadUsers().then(()=>{$('bl').innerHTML=[...blocked].map(id=>`<div class="sw"><span>🚫 ${esc(uOf(id).name)}</span><button class="btn s" data-u="${id}" style="width:auto;margin:0;padding:6px 10px">${t('Débloquer')}</button></div>`).join('');$('bl').onclick=async e=>{const id=e.target.dataset&&e.target.dataset.u;if(id){await unblock(id);viewSettings()}}}).catch(()=>{});
  $('lf').onclick=()=>setLang('fr',()=>go('settings'));$('le').onclick=()=>setLang('en',()=>go('settings'));
- if($('ins'))$('ins').onclick=async()=>{dip.prompt();await dip.userChoice;dip=null;viewSettings()};
+ if($('ins'))$('ins').onclick=async()=>{if(dip){dip.prompt();try{await dip.userChoice}catch(e){}dip=null;viewSettings()}else alert(L('Menu ⋮ de Chrome → « Ajouter à l’écran d’accueil ». Si l’app est déjà installée, ouvre-la depuis ton écran d’accueil.','Chrome menu ⋮ → “Add to Home screen”. If the app is already installed, open it from your home screen.'))};
  $('bo').onclick=async()=>{const d={spent:(me.spent||0)+5,boostUntil:Math.max(Date.now(),me.boostUntil||0)+864e5};
   try{await db.doc('users/'+uid).set(d,{merge:true});me={...me,...d};alert(L('Ton profil est boosté pour 24 h ! 🚀','Your profile is boosted for 24h! 🚀'));viewSettings()}catch(e){alert(e.message)}}}
 
@@ -347,7 +348,7 @@ async function comments(p){const o=document.createElement('div');o.className='ov
 
 /* ---- Animations, notifications, présence ---- */
 function burst(e,n=8){for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fl';s.textContent=e;s.style.left=(20+Math.random()*60)+'vw';s.style.top=(45+Math.random()*20)+'vh';s.style.animationDelay=(i*70)+'ms';document.body.appendChild(s);setTimeout(()=>s.remove(),1500)}}
-function toast(txt){const d=document.createElement('div');d.className='toast';d.textContent=txt;d.onclick=()=>{d.remove();go('notifs')};document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}setTimeout(()=>d.remove(),4500)}
+function toast(txt,nc){const d=document.createElement('div');d.className='toast';d.textContent=txt;d.onclick=()=>{d.remove();if(!nc)go('notifs')};document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}setTimeout(()=>d.remove(),4500)}
 async function notify(to,type,extra){try{await db.collection('notifications').add({to,from:uid,type,at:TS(),read:false,...(extra||{})})}catch(e){}}
 const ntxt=n=>{const u=uOf(n.from).name||'?',M={like:L(`${u} a aimé ton profil ❤️`,`${u} liked your profile ❤️`),smash:L(`${u} t’a envoyé un SMASH 💥`,`${u} sent you a SMASH 💥`),match:L(`C’est un match avec ${u} 💞`,`It’s a match with ${u} 💞`),comment:L(`${u} a commenté ta publication`,`${u} commented on your post`),reply:L(`${u} a répondu à ton commentaire`,`${u} replied to your comment`),clike:L(`${u} a aimé ton commentaire ❤️`,`${u} liked your comment ❤️`),plike:L(`${u} a aimé ta publication ❤️`,`${u} liked your post ❤️`),warn:L('⚠️ Avertissement de l’équipe Bolingo : ','⚠️ Warning from the Bolingo team: ')+(n.text||'')};return M[n.type]||n.text||''};
 function badges(){const un=nots.filter(n=>!n.read).length,um=mats.reduce((a,m)=>a+((m.unread||{})[uid]||0),0);
@@ -430,6 +431,21 @@ function memberSheet(u){const o=document.createElement('div');o.className='ov';
 async function admStats(D){const q=n=>db.collection(n).get().then(s=>s.size).catch(()=>'?');
  const [us,po,st,ma,tk,vf2]=await Promise.all([q('users'),q('posts'),q('stories'),q('matches'),q('tickets'),q('verifs')]);
  D.innerHTML=`<div class="box">${[['👥 Membres',us],['🟢 En ligne',allUsers.filter(online).length],['📰 Publications',po],['📸 Stories',st],['💞 Matchs',ma],['📮 Messages support',tk],['✅ Demandes de vérification',vf2]].map(x=>`<div class="sw"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div>`}
+
+/* ---- Bouton retour du téléphone & installation ---- */
+const PARENT={chat:'matches',matches:'swipe',moments:'swipe',profile:'swipe',settings:'swipe',notifs:'swipe',admin:'settings'};
+let cur='swipe',installed=false;
+const ensureState=()=>{if(!(history.state&&history.state.a))history.pushState({a:1},'')};
+history.replaceState({r:1},'');history.pushState({a:1},'');
+new MutationObserver(m=>m.forEach(x=>x.addedNodes.forEach(n=>{if(n.classList&&(n.classList.contains('ov')||n.classList.contains('view')))ensureState()}))).observe(document.body,{childList:true});
+addEventListener('popstate',()=>{
+ const ov=[...document.querySelectorAll('.ov,.view')].pop();
+ if(ov){ov.remove();ensureState();return}
+ const incomplete=uid&&(!me.name||!me.gender||!(me.photos&&me.photos.length));
+ if(!uid||incomplete||cur==='swipe'){toast(L('Appuie encore sur retour pour quitter','Press back again to exit'),1);return}
+ go(PARENT[cur]||'swipe')});
+addEventListener('appinstalled',()=>{installed=true;dip=null});
+const isStandalone=()=>installed||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 
 /* ---- Démarrage ---- */
 document.documentElement.lang=lang;if(LS.g('dm'))document.body.classList.add('dark');buildNav();$('hb').onclick=()=>go('notifs');
