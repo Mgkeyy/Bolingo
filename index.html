@@ -121,7 +121,8 @@ const REL=['','Chrétien','Catholique','Protestant','Musulman','Kimbanguiste','A
 function resize(file){return new Promise((ok,ko)=>{const r=new FileReader();r.onerror=ko;r.onload=()=>{const i=new Image();i.onerror=ko;i.onload=()=>{const k=Math.min(1,640/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};i.src=r.result};r.readAsDataURL(file)})}
 async function claimRef(x){let r=(x||LS.g('ref')||'').trim();const m=r.match(/ref=([A-Za-z0-9]+)/);if(m)r=m[1];
  if(r&&r!==uid){try{await db.doc('referrals/'+uid).set({inviter:r,at:TS()});notify(r,'news',{text:L('⭐ +5 étoiles : '+(me.name||'un membre')+' a rejoint Bolingo grâce à ton lien !','⭐ +5 stars: '+(me.name||'a member')+' joined Bolingo with your link!')})}catch(e){toast('⚠ '+L('Parrainage non enregistré : ','Referral not saved: ')+(e.code||e.message),1)}}LS.s('ref','')}
-function viewProfile(first){
+async function viewProfile(first){
+ if(!first&&!me.name){try{const d=await db.doc('users/'+uid).get();if(d.exists)me=d.data()}catch(e){}}
  const p=me,photos=[...(p.photos||[])];
  const sel=(id,o,v)=>`<select id="${id}">${o.map(x=>`<option value="${x}" ${x===v?'selected':''}>${x?t(x):''}</option>`).join('')}</select>`;
  const inp=(id,l,v,ty='text',x='')=>`<label>${t(l)}</label><input id="${id}" type="${ty}" value="${esc(v)}" ${x}>`;
@@ -298,19 +299,38 @@ async function viewMoments(){
   try{await db.collection('posts').add({from:uid,text,img:img||'',at:TS(),likes:[]});viewMoments()}catch(e){alert(e.message);$('pu').disabled=false}};
  try{await loadUsers();loadStories();loadFeed()}catch(e){$('fd').innerHTML='<p class="err">'+esc(e.message)+'</p>'}}
 async function loadStories(){
- const so=$('so');so.innerHTML=`<div id="mys"><div class="av add">+</div>${t('Ma story')}</div>`;$('mys').onclick=addStory;
- try{const s=await db.collection('stories').where('expiresAt','>',Date.now()).get(),by={};
-  s.forEach(d=>{const x={id:d.id,...d.data()};if(!blocked.has(x.from))(by[x.from]=by[x.from]||[]).push(x)});
-  Object.keys(by).forEach(id=>{const u=uOf(id),el=document.createElement('div');el.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div>${esc(id===uid?t('Moi'):u.name)}`;
-   el.onclick=()=>viewStory(by[id].sort((a,b)=>a.expiresAt-b.expiresAt),u);so.appendChild(el)})}catch(e){}}
+ const so=$('so');so.innerHTML='';const by={};
+ try{const q=await db.collection('stories').where('expiresAt','>',Date.now()).get();q.forEach(d=>{const x={id:d.id,...d.data()};if(!blocked.has(x.from))(by[x.from]=by[x.from]||[]).push(x)})}catch(e){}
+ const mine=(by[uid]||[]).sort((x,y)=>x.expiresAt-y.expiresAt),my=document.createElement('div');
+ my.innerHTML=`<div class="av ${mine.length?'':'add'}" style="${mine.length?`background-image:url(${mine[mine.length-1].img})`:''}">${mine.length?'':'+'}</div>${t('Ma story')}`;
+ my.onclick=()=>mine.length?viewStory(mine,Object.assign({},me,{id:uid})):addStory();so.appendChild(my);
+ if(mine.length){const ad=document.createElement('div');ad.innerHTML=`<div class="av add">+</div>${L('Ajouter','Add')}`;ad.onclick=addStory;so.appendChild(ad)}
+ Object.keys(by).filter(id=>id!==uid).forEach(id=>{const u=uOf(id),el=document.createElement('div');el.innerHTML=`<div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div>${esc(u.name)}`;
+  el.onclick=()=>viewStory(by[id].sort((x,y)=>x.expiresAt-y.expiresAt),u);so.appendChild(el)})}
 function addStory(){const i=document.createElement('input');i.type='file';i.accept='image/*';
  i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const img=await resize(f),text=prompt(L('Ajoute un texte (facultatif)','Add a caption (optional)'))||'';await db.collection('stories').add({from:uid,img,text:text.slice(0,140),at:TS(),expiresAt:Date.now()+864e5});viewMoments()}catch(e){alert(e.message)}};i.click()}
-function viewStory(list,u){let i=0;const v=document.createElement('div');v.className='view';
- const draw=()=>{const s=list[i];
-  v.innerHTML=`<div style="padding:12px 14px;display:flex;justify-content:space-between"><b>${esc(u.name)} · ${ago(s.at)}</b><span>${s.from===uid?'<button id="sd2" style="background:none;border:0;color:#fff;font-size:18px">🗑</button> ':''}<button id="sx" style="background:none;border:0;color:#fff;font-size:22px">✕</button></span></div><img src="${s.img}"><p style="text-align:center;padding:10px">${esc(s.text)}</p>`;
-  $('sx').onclick=e=>{e.stopPropagation();v.remove()};
-  if($('sd2'))$('sd2').onclick=async e=>{e.stopPropagation();try{await db.collection('stories').doc(s.id).delete()}catch(x){alert(x.message)}v.remove();viewMoments()}};
- v.onclick=()=>{i++;if(i>=list.length)v.remove();else draw()};draw();document.body.appendChild(v)}
+async function viewStory(list,u){
+ let i=0;const mine=u.id===uid,mid=[uid,u.id].sort().join('_'),isMatch=mats.some(m=>m.id===mid);let canReply=isMatch;
+ if(!mine&&!canReply){try{const sw=await db.doc('swipes/'+uid+'_'+u.id).get();canReply=sw.exists&&sw.data().type==='smash'}catch(e){}}
+ const v=document.createElement('div');v.className='view';document.body.appendChild(v);
+ const bs='background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:20px;padding:8px 14px;font-size:18px';
+ const draw=async()=>{const s=list[i],R0=db.doc('storyviews/'+s.id+'_'+uid);let liked=false,views=[];
+  if(!mine){try{const d=await R0.get();liked=d.exists&&!!d.data().liked;if(!d.exists)await R0.set({story:s.id,owner:s.from,viewer:uid,liked:false,at:TS()})}catch(e){}}
+  else{try{views=(await db.collection('storyviews').where('owner','==',uid).where('story','==',s.id).get()).docs.map(d=>d.data())}catch(e){}}
+  const bar=mine?`<button id="vw" style="${bs}">👁 ${views.length} · ❤️ ${views.filter(x=>x.liked).length}</button>`:`<button id="lk" style="${bs}">${liked?'❤️':'🤍'}</button><button id="sh" style="${bs}">🔁</button>`;
+  v.innerHTML=`<div style="padding:12px 14px;display:flex;justify-content:space-between"><b>${esc(mine?t('Moi'):u.name)} · ${ago(s.at)}</b><span>${mine?`<button id="sd2" style="${bs}">🗑</button> `:''}<button id="sx" style="${bs}">✕</button></span></div><img src="${s.img}"><p style="text-align:center;padding:10px">${esc(s.text)}</p><div style="padding:0 14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center">${bar}${!mine?(canReply?`<input id="ri" maxlength="300" placeholder="${L('Répondre…','Reply…')}" style="flex:1;margin:0;min-width:140px"><button id="rb" style="${bs}">➤</button>`:`<small style="opacity:.8">${L('Envoie un Smash 💥 pour pouvoir répondre','Send a Smash 💥 to reply')}</small>`):''}</div>`;
+  $('sx').onclick=()=>v.remove();
+  v.querySelector('img').onclick=()=>{i++;if(i>=list.length)v.remove();else draw()};
+  if($('sd2'))$('sd2').onclick=async()=>{if(!confirm(L('Supprimer cette story ?','Delete this story?')))return;try{await db.collection('stories').doc(s.id).delete()}catch(x){alert(x.message)}v.remove();viewMoments()};
+  if($('vw'))$('vw').onclick=()=>{const o=document.createElement('div');o.className='ov';o.style.zIndex=40;
+   o.innerHTML=`<div class="sheet"><h3 style="margin-top:0">👁 ${L('Vues','Views')} (${views.length})</h3>${views.length?'':`<p class="muted">${L('Personne pour l’instant.','Nobody yet.')}</p>`}<div id="vl"></div><button class="btn" id="vc2">${t('Fermer')}</button></div>`;
+   document.body.appendChild(o);o.onclick=e=>{if(e.target===o)o.remove()};$('vc2').onclick=()=>o.remove();
+   views.forEach(x=>{const it=userRow(uOf(x.viewer),()=>{}),h=document.createElement('span');h.textContent=x.liked?'❤️':'';h.style.cssText='margin-left:auto;font-size:20px';it.appendChild(h);$('vl').appendChild(it)})};
+  if($('lk'))$('lk').onclick=async()=>{liked=!liked;try{await R0.set({story:s.id,owner:s.from,viewer:uid,liked,at:TS()},{merge:true});if(liked){burst('❤️',6);notify(s.from,'slike',{story:s.id})}$('lk').textContent=liked?'❤️':'🤍'}catch(x){alert(x.message)}};
+  if($('sh'))$('sh').onclick=async()=>{if(!confirm(L('Republier cette story sur ton mur ?','Reshare this story on your wall?')))return;try{await db.collection('posts').add({from:uid,text:s.text||'',img:s.img,shared:s.from,at:TS(),likes:[]});notify(s.from,'repost',{});toast(L('Republié sur ton mur ✔','Reshared ✔'),1)}catch(x){alert(x.message)}};
+  if($('rb'))$('rb').onclick=async()=>{const tx=$('ri').value.trim();if(!tx)return;$('ri').value='';
+   try{notify(u.id,'sreply',{text:tx.slice(0,300),story:s.id});if(isMatch){await db.collection('matches/'+mid+'/messages').add({from:uid,text:'↩ '+L('Réponse à ta story : ','Reply to your story: ')+tx,at:TS(),read:false});bump(mid,'↩ '+tx)}toast(L('Réponse envoyée ✔','Reply sent ✔'),1)}catch(x){alert(x.message)}}};
+ draw()}
 async function loadFeed(){const fd=$('fd');
  try{const s=await db.collection('posts').orderBy('at','desc').limit(30).get();fd.innerHTML='';let n=0;
   s.forEach(d=>{const p={id:d.id,...d.data()};if(blocked.has(p.from))return;n++;fd.appendChild(postEl(p))});
@@ -318,11 +338,12 @@ async function loadFeed(){const fd=$('fd');
 function postEl(p){
  const u=uOf(p.from),el=document.createElement('div');el.className='post';
  const draw=()=>{const lk=(p.likes||[]).includes(uid);
-  el.innerHTML=`<div class="h"><div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div style="flex:1"><b>${esc(u.name)} ${esc(u.lastName)}${vf(u)}</b><div class="muted" style="text-align:left;font-size:12px">${ago(p.at)}</div></div><button class="ibt" id="mo" style="width:36px;height:36px;font-size:18px;box-shadow:none;background:none">⋯</button></div>${p.text?`<p style="white-space:pre-wrap;margin:8px 0 0">${esc(p.text)}</p>`:''}${p.img?`<img class="pi" src="${p.img}">`:''}<div class="a"><button id="lk" class="${lk?'on':''}">${lk?'❤️':'🤍'} ${(p.likes||[]).length}</button><button id="cm">💬 ${t('Commenter')}</button></div>`;
+  el.innerHTML=`<div class="h"><div class="av" style="${bg(u)}">${u.photos?'':esc((u.name||'?')[0])}</div><div style="flex:1"><b>${esc(u.name)} ${esc(u.lastName)}${vf(u)}</b><div class="muted" style="text-align:left;font-size:12px">${ago(p.at)}</div></div><button class="ibt" id="mo" style="width:36px;height:36px;font-size:18px;box-shadow:none;background:none">⋯</button></div>${p.shared?`<div class="muted" style="text-align:left;font-size:12px;margin-top:6px">🔁 ${L('Republié de ','Reshared from ')}${esc(uOf(p.shared).name)}</div>`:''}${p.text?`<p style="white-space:pre-wrap;margin:8px 0 0">${esc(p.text)}</p>`:''}${p.img?`<img class="pi" src="${p.img}">`:''}<div class="a"><button id="lk" class="${lk?'on':''}">${lk?'❤️':'🤍'} ${(p.likes||[]).length}</button><button id="cm">💬 ${t('Commenter')}</button><button id="rp2">🔁</button></div>`;
   el.querySelector('.av').onclick=()=>{if(u.name!=='?')detail(u,{like:p.from!==uid})};
   el.querySelector('#lk').onclick=async()=>{const R=db.doc('posts/'+p.id);p.likes=p.likes||[];
    try{if(lk){await R.update({likes:firebase.firestore.FieldValue.arrayRemove(uid)});p.likes=p.likes.filter(x=>x!==uid)}else{await R.update({likes:firebase.firestore.FieldValue.arrayUnion(uid)});p.likes.push(uid);burst('❤️',5);if(p.from!==uid)notify(p.from,'plike',{post:p.id})}draw()}catch(e){alert(e.message)}};
   el.querySelector('#cm').onclick=()=>comments(p);const pi=el.querySelector('.pi');if(pi)pi.onclick=()=>openImg(p.img);
+  el.querySelector('#rp2').onclick=async()=>{if(!confirm(L('Republier sur ton mur ?','Reshare on your wall?')))return;try{await db.collection('posts').add({from:uid,text:p.text||'',img:p.img||'',shared:p.shared||p.from,at:TS(),likes:[]});if(p.from!==uid)notify(p.from,'repost',{});toast(L('Republié ✔','Reshared ✔'),1)}catch(e){alert(e.message)}};
   el.querySelector('#mo').onclick=async()=>{
    if(p.from===uid||isAdm){if(confirm(L('Supprimer cette publication ?','Delete this post?'))){try{await db.doc('posts/'+p.id).delete();el.remove()}catch(e){alert(e.message)}}}
    else{const tx=prompt(L('Pourquoi signalez-vous cette publication ?','Why are you reporting this post?'));if(tx===null)return;try{await db.collection('tickets').add({from:uid,type:'post',about:p.from,post:p.id,text:tx||'-',status:'new',at:TS()});alert(L('Merci, signalement envoyé.','Thanks, report sent.'))}catch(e){alert(e.message)}}}};
@@ -350,7 +371,7 @@ async function comments(p){const o=document.createElement('div');o.className='ov
 function burst(e,n=8){for(let i=0;i<n;i++){const s=document.createElement('span');s.className='fl';s.textContent=e;s.style.left=(20+Math.random()*60)+'vw';s.style.top=(45+Math.random()*20)+'vh';s.style.animationDelay=(i*70)+'ms';document.body.appendChild(s);setTimeout(()=>s.remove(),1500)}}
 function toast(txt,nc){const d=document.createElement('div');d.className='toast';d.textContent=txt;d.onclick=()=>{d.remove();if(!nc)go('notifs')};document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}setTimeout(()=>d.remove(),4500)}
 async function notify(to,type,extra){try{await db.collection('notifications').add({to,from:uid,type,at:TS(),read:false,...(extra||{})})}catch(e){}}
-const ntxt=n=>{const u=uOf(n.from).name||'?',M={like:L(`${u} a aimé ton profil ❤️`,`${u} liked your profile ❤️`),smash:L(`${u} t’a envoyé un SMASH 💥`,`${u} sent you a SMASH 💥`),match:L(`C’est un match avec ${u} 💞`,`It’s a match with ${u} 💞`),comment:L(`${u} a commenté ta publication`,`${u} commented on your post`),reply:L(`${u} a répondu à ton commentaire`,`${u} replied to your comment`),clike:L(`${u} a aimé ton commentaire ❤️`,`${u} liked your comment ❤️`),plike:L(`${u} a aimé ta publication ❤️`,`${u} liked your post ❤️`),warn:L('⚠️ Avertissement de l’équipe Bolingo : ','⚠️ Warning from the Bolingo team: ')+(n.text||'')};return M[n.type]||n.text||''};
+const ntxt=n=>{const u=uOf(n.from).name||'?',M={like:L(`${u} a aimé ton profil ❤️`,`${u} liked your profile ❤️`),smash:L(`${u} t’a envoyé un SMASH 💥`,`${u} sent you a SMASH 💥`),match:L(`C’est un match avec ${u} 💞`,`It’s a match with ${u} 💞`),comment:L(`${u} a commenté ta publication`,`${u} commented on your post`),reply:L(`${u} a répondu à ton commentaire`,`${u} replied to your comment`),clike:L(`${u} a aimé ton commentaire ❤️`,`${u} liked your comment ❤️`),plike:L(`${u} a aimé ta publication ❤️`,`${u} liked your post ❤️`),slike:L(`${u} a aimé ta story ❤️`,`${u} liked your story ❤️`),sreply:L(`${u} a répondu à ta story : « ${n.text||''} »`,`${u} replied to your story: “${n.text||''}”`),repost:L(`${u} a republié ton contenu 🔁`,`${u} reshared your content 🔁`),warn:L('⚠️ Avertissement de l’équipe Bolingo : ','⚠️ Warning from the Bolingo team: ')+(n.text||'')};return M[n.type]||n.text||''};
 function badges(){const un=nots.filter(n=>!n.read).length,um=mats.reduce((a,m)=>a+((m.unread||{})[uid]||0),0);
  if($('bn'))$('bn').textContent=un||'';const b=nav.querySelector('[data-v="matches"]');if(b){let e=b.querySelector('.bd');if(!e){e=document.createElement('i');e.className='bd';b.appendChild(e)}e.textContent=um||''}}
 function listen(){let f1=true,f2=true;
@@ -486,7 +507,8 @@ auth.onAuthStateChanged(async u=>{
  stop();if(unL){unL();unL=null}if(!u){uid=null;me={};isAdm=false;nots=[];mats=[];viewAuth();return}
  if(u.providerData[0]&&u.providerData[0].providerId==='password'&&!u.emailVerified){uid=null;viewVerify(u);return}
  uid=u.uid;nav.style.display='flex';buildNav();spin();
- try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{}}catch(e){me={}}
+ let okLoad=false;for(let i=0;i<6&&!okLoad;i++){try{const p=await db.doc('users/'+uid).get();me=p.exists?p.data():{};okLoad=true}catch(e){await new Promise(r=>setTimeout(r,1200*(i+1)))}}
+ if(!okLoad){nav.style.display='none';app.innerHTML=`<div class="box muted"><h2>${L('Connexion difficile','Connection problem')}</h2><p>${L('Impossible de charger ton profil pour le moment. Vérifie ta connexion internet.','Could not load your profile right now. Check your internet connection.')}</p><button class="btn" id="rt">${L('Réessayer','Retry')}</button></div>`;$('rt').onclick=()=>location.reload();return}
  try{blocked=new Set();(await db.collection('blocks').where('by','==',uid).get()).forEach(d=>blocked.add(d.data().target));favs=new Set();(await db.collection('favs').where('by','==',uid).get()).forEach(d=>favs.add(d.data().target));cleanStories()}catch(e){}
  try{isAdm=(await db.doc('admins/'+uid).get()).exists}catch(e){isAdm=false}
  try{await loadUsers(true)}catch(e){}
